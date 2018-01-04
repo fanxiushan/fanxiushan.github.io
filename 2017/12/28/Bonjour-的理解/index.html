@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.0" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NSError 最佳实践">
+<meta property="og:url" content="http://yoursite.com/2017/12/29/NSError-最佳实践/index.html">
+<meta property="og:site_name" content="FanFrank&#39;s Site">
+<meta property="og:description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-29T09:37:49.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NSError 最佳实践">
+<meta name="twitter:description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/29/NSError-最佳实践/"/>
+
+
+
+
+
+  <title>Bonjour 的理解 | FanFrank's Site</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-111759275-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FanFrank's Site</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/28/Bonjour-的理解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FanFrank">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FanFrank's Site">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Bonjour 的理解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T20:20:41+08:00">2017-12-28</time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/12/28/Bonjour-的理解/" class="leancloud_visitors" data-flag-title="Bonjour 的理解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>先提问几个问题</p>
+<ol>
+<li>什么是 Bonjour？</li>
+<li>Bonjour 提供了哪些服务？</li>
+<li>Bonjour 的工作机制是什么样子的?</li>
+<li>Bonjour 实践</li>
+<li>Bonjour 异常分析</li>
+</ol>
+<h2 id="什么是-Bonjour"><a href="#什么是-Bonjour" class="headerlink" title="什么是 Bonjour"></a>什么是 Bonjour</h2><p>Bonjour 被认为是 0 网络配置，自动发现 PC，普通设备和 IP 网络服务的协议。Bonjour 使用工业标准的 IP 协议，允许一台设备在不需要输入对方 IP 地址或配置 DNS 服务器的情况下自动发现其他设备。特别是 Bonjour 不需要 DHCP 服务器就能使 IP 自动分配，同时无需 DNS 服务器能给 IP 命名，发现服务不需要额外的服务器。同时它是个开放的协议。</p>
+<blockquote>
+<p>Bonjour, also known as zero-configuration networking, enables automatic discovery of computers, devices, and services on IP networks. Bonjour uses industry standard IP protocols to allow devices to automatically discover each other without the need to enter IP addresses or configure DNS servers. See the Bonjour Protocol Specifications section for more details on the underlying standards.  <a href="https://developer.apple.com/library/content/qa/qa1690/_index.html" target="_blank" rel="noopener">Technical Q&amp;A QA1690 Common QA for Bonjour</a></p>
+</blockquote>
+<p>一个实际场景是，我的电脑想用使用打印机打印一些资料，Bonjour 可以使打印机自动连接到网络，同时给打印机分配一个 IP 地址，无需任何配置，相同网络下的电脑就可以发现这台打印机，并识别到打印机的 IP 地址，进而建立连接完成打印工作。而且如果你以后地址被动态分配的地址被改变了，Bonjour 还能继续发现新的地址。</p>
+<h2 id="Bonjour-提供了哪些服务？"><a href="#Bonjour-提供了哪些服务？" class="headerlink" title="Bonjour 提供了哪些服务？"></a>Bonjour 提供了哪些服务？</h2><ol>
+<li>addressing  (向 host 分配 IP 地址)</li>
+<li>naming （使用名字代表 host 而不是 IP 地址）</li>
+<li>service discovery （自动发现网络中的服务）</li>
+</ol>
+<h2 id="Bonjour-的工作机制是什么样子的"><a href="#Bonjour-的工作机制是什么样子的" class="headerlink" title="Bonjour 的工作机制是什么样子的?"></a>Bonjour 的工作机制是什么样子的?</h2><p>其实就是说一下上面三个服务的实现机制</p>
+<ol>
+<li><p>分配 IP 的原理，使用链路本地地址（link-local address） 来解决。</p>
+<p>IPv6 协议包含了这种技术。IPv4 是使用另外的实现来达到这个目的，IPv4 的实现原理是在本地链路中随机取一个地址然后测试是不是被占用，如果没有占用则分配其为本地链路地址，否则重新生成并继续测试占用情况。 link-local address 这项技术被绝大多数操作系统实现，如果硬件厂商想要使用 Bonjour 服务也必须在自己的设备里实现这项技术。</p>
+<p>对 link-local address 有兴趣的可以看下<a href="https://en.wikipedia.org/wiki/Link-local_address" target="_blank" rel="noopener">它的 wiki</a></p>
+</li>
+<li><p>在本地网络中解决 IP 到名字的转换的合适方案是使用 <code>Multicast DNS (mDNS)</code>。</p>
+<p> 具体实现原理是使用 IP 多播的方式在本地网络中发送 DNS 格式的查询，因为没有一个统一的 DNS 服务器去响应这些查询，所以每个设备或者服务都会去返回自己的 DNS 响应</p>
+<p> 可以通过 Bonjour 提供的 API 注册服务，Bonjour 可以自动广播你的服务，任何查询你的服务的请求都会直接被转到正确的 IP 和端口。</p>
+<p> 每个服务和设备都应该只有一个名字，这个名字只在当前的网络环境下起作用。这个起名字的过程大概是这样的</p>
+<ol>
+<li>硬件厂商的设备通过发送带有自己名字（XYZ-LaserPrinter.local）的查询来看下是否当前网络中有一样的，如果有响应那就应该重新起个名字（XYZ-LaserPrinter-1.local 这个名字是在原来名字的基础上继续拼接了一个数字）如果没有则继续之前的操作。直到新的名字的查询没有响应。</li>
+<li><p>软件服务是当注册的时候自己起一个名字，如果名字已经被使用了，则 Bonjour 协议会重新给它起一个。</p>
+<p>为了向系统表明 local host，macOS 上会在 local host 后面再加个点,比如 <code>Steve.local.</code>。 这部分命名规则比较复杂，这里不赘述了。</p>
+</li>
+</ol>
+</li>
+<li><p>通过 DNS 发现服务的过程称为 DNS-SD（DNS Service Discovery）。发现服务这部分的内容还是建立在前面两部的基础上，一个指定服务类型和域名的 mDNS 查询发出去后，有符合条件的服务会返回它们的名字，结果包含了你可选择的一系列服务。和传统的查询服务不同，Bonjour 的服务更类似于询问「我想要的打印服务有没有」，而不是询问每个设备你在运行什么服务（Apple 官方对后者的的说明是，这种询问是以设备为中心的，而前者是以服务为中心）前者相比后者来说对 Client 更加有意义，Client 并不关心其他设备是干嘛的，不断询问只会造成网络压力。</p>
+</li>
+</ol>
+<h2 id="Bonjour-实践"><a href="#Bonjour-实践" class="headerlink" title="Bonjour 实践"></a>Bonjour 实践</h2><p>macOS 系统提供了一个名为 <code>dns-sd</code> 的 Multicast DNS (mDNS) 和 DNS Service Discovery (DNS-SD) 测试工具。</p>
+<p>一个例子，我想查看当前网络下能提供打印的服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ dns-sd -B _printer</span><br><span class="line">Browsing for _printer._tcp</span><br><span class="line">DATE: ---Thu 28 Dec 2017---</span><br><span class="line">19:45:30.989  ...STARTING...</span><br><span class="line">Timestamp     A/R    Flags  if Domain               Service Type         Instance Name</span><br><span class="line">19:45:30.990  Add        3   5 local.               _printer._tcp.       Brother MFC-8510DN [30055c9332be] (2)</span><br><span class="line">19:45:30.990  Add        2   5 local.               _printer._tcp.       Brother MFC-8510DN [30055c92a583] (2)</span><br></pre></td></tr></table></figure>
+<p>我啥都不指定是默认会列出当前提供 http 的服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ dns-sd -B  </span><br><span class="line">Browsing for _http._tcp</span><br><span class="line">DATE: ---Thu 28 Dec 2017---</span><br><span class="line">19:45:49.802  ...STARTING...</span><br><span class="line">Timestamp     A/R    Flags  if Domain               Service Type         Instance Name</span><br><span class="line">19:45:49.803  Add        3   8 local.               _http._tcp.          webserver (5)</span><br><span class="line">19:45:49.804  Add        3   8 local.               _http._tcp.          bxxx</span><br></pre></td></tr></table></figure>
+<p>还有一个 Bonjour Browser 的软件(如图)来提供可视化的 Bonjour 服务浏览<br><img src="/media/Jietu20171228-195757.png" alt="Jietu20171228-195757"></p>
+<h2 id="为啥有的时候连不上-Bonjour"><a href="#为啥有的时候连不上-Bonjour" class="headerlink" title="为啥有的时候连不上 Bonjour?"></a>为啥有的时候连不上 Bonjour?</h2><ol>
+<li>确认路由器开启了组播模式，某些路由器（如思科）默认关闭了「组播模式」，故无法在此网络下搜索到设备.</li>
+<li>跟二次认证网络应该也没有关系.</li>
+<li>如果是用 iPhone 设备有的时候跟 iOS 系统版本也有关系，参考 <a href="https://stackoverflow.com/questions/38969032/nsnetservicebrowser-can-not-find-service-sometimes" target="_blank" rel="noopener">这里</a></li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://developer.apple.com/library/content/qa/qa1690/_index.html" target="_blank" rel="noopener">Technical Q&amp;A QA1690 Common QA for Bonjour</a><br><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/NetServices/Introduction.html" target="_blank" rel="noopener">Bonjour Overview</a><br><a href="https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/dns-sd.1.html" target="_blank" rel="noopener">dns-sd</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/21/GCD-的理解/" rel="next" title="GCD 的理解">
+                <i class="fa fa-chevron-left"></i> GCD 的理解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/29/NSError-最佳实践/" rel="prev" title="NSError 最佳实践">
+                NSError 最佳实践 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="FanFrank" />
+            
+              <p class="site-author-name" itemprop="name">FanFrank</p>
+              <p class="site-description motion-element" itemprop="description">iOS & macOS Develop</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yourname" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/fanxiushan/" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Weibo</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-Bonjour"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x4EC0;&#x4E48;&#x662F;-Bonjour" class="headerlink" title="&#x4EC0;&#x4E48;&#x662F; Bonjour"></a>&#x4EC0;&#x4E48;&#x662F; Bonjour</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-提供了哪些服务？"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Bonjour-&#x63D0;&#x4F9B;&#x4E86;&#x54EA;&#x4E9B;&#x670D;&#x52A1;&#xFF1F;" class="headerlink" title="Bonjour &#x63D0;&#x4F9B;&#x4E86;&#x54EA;&#x4E9B;&#x670D;&#x52A1;&#xFF1F;"></a>Bonjour &#x63D0;&#x4F9B;&#x4E86;&#x54EA;&#x4E9B;&#x670D;&#x52A1;&#xFF1F;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-的工作机制是什么样子的"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Bonjour-&#x7684;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x5B50;&#x7684;" class="headerlink" title="Bonjour &#x7684;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x5B50;&#x7684;?"></a>Bonjour &#x7684;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x5B50;&#x7684;?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-实践"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Bonjour-&#x5B9E;&#x8DF5;" class="headerlink" title="Bonjour &#x5B9E;&#x8DF5;"></a>Bonjour &#x5B9E;&#x8DF5;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为啥有的时候连不上-Bonjour"><span class="nav-number">5.</span> <span class="nav-text"><a href="#&#x4E3A;&#x5565;&#x6709;&#x7684;&#x65F6;&#x5019;&#x8FDE;&#x4E0D;&#x4E0A;-Bonjour" class="headerlink" title="&#x4E3A;&#x5565;&#x6709;&#x7684;&#x65F6;&#x5019;&#x8FDE;&#x4E0D;&#x4E0A; Bonjour?"></a>&#x4E3A;&#x5565;&#x6709;&#x7684;&#x65F6;&#x5019;&#x8FDE;&#x4E0D;&#x4E0A; Bonjour?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FanFrank</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.0.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("fnYkA3dAQO9X0BxvP41VcLiK-gzGzoHsz", "JNMemtBzWyj0aq2zz5qKNGTb");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
