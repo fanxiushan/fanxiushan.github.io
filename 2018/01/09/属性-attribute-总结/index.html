@@ -123,7 +123,7 @@
 
 
 
-  <title>NSError 最佳实践 | FanFrank's Site</title>
+  <title>属性 attribute 总结 | FanFrank's Site</title>
   
 
 
@@ -275,7 +275,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/29/NSError-最佳实践/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/09/属性-attribute-总结/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FanFrank">
@@ -292,7 +292,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">NSError 最佳实践</h1>
+          <h1 class="post-title" itemprop="name headline">属性 attribute 总结</h1>
         
 
         <div class="post-meta">
@@ -304,7 +304,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-29T17:33:36+08:00">2017-12-29</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-09T21:59:57+08:00">2018-01-09</time>
             
 
             
@@ -320,7 +320,7 @@
 
           
           
-             <span id="/2017/12/29/NSError-最佳实践/" class="leancloud_visitors" data-flag-title="NSError 最佳实践">
+             <span id="/2018/01/09/属性-attribute-总结/" class="leancloud_visitors" data-flag-title="属性 attribute 总结">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -351,19 +351,70 @@
       
 
       
-        <h1 id="NSError-的使用"><a href="#NSError-的使用" class="headerlink" title="NSError 的使用"></a>NSError 的使用</h1><p>访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。<code>- (BOOL)removeItemAtPath:(NSString *)path error:(NSError * _Nullable *)error;</code>  </p>
-<p>使用类似 API 的时候通常都是传递 <code>NSError * _Nullable *</code> 这种参数，目的是为了延长 error 的初始化时机，让 error 在执行任务的时候再初始化并赋予错误信息。</p>
-<p><code>NSError</code> 里面包含的信息很丰富。主要是三个，domain，code 和错误相关的信息。code 是和 domain 相关的。</p>
-<p>一个 NSError 的最佳实践是是使用倒序域名方式，这样可以有效避免 NSError 的域名重复。然后根据倒序域名定义错误 code，域名不重复的话，这些 code 可以随意定制，是不会和别的域名下的 code 冲突的。具体看下面 demo </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">static NSString *const kUserInfoDomain = @&quot;com.app.userinfo&quot;;</span><br><span class="line"></span><br><span class="line">typedef enum : NSUInteger &#123;</span><br><span class="line">    AUIUserNotExist = 0,</span><br><span class="line">    AUIUserNameEmpty,</span><br><span class="line">&#125; AUIErrorCode;</span><br><span class="line"></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    [self fetchUserInfoWithError:&amp;error];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSString *)fetchUserInfoWithError:(NSError **)error &#123;</span><br><span class="line">    NSDictionary *errInfo =@&#123;NSLocalizedDescriptionKey:@&quot;用户不存在&quot;&#125;;</span><br><span class="line">    - (void)btnPressed:(id)sender &#123;</span><br><span class="line">    NSError *error = nil;</span><br><span class="line">    [self fetchUserInfoWithError:error];</span><br><span class="line">    NSLog(@&quot;error = %@&quot;,error);</span><br><span class="line">&#125;</span><br><span class="line">//模拟一次错误获取</span><br><span class="line">- (NSString *)fetchUserInfoWithError:(NSError **)error &#123;</span><br><span class="line">    NSDictionary *errInfo = @&#123;NSLocalizedDescriptionKey:@&quot;用户不存在&quot;&#125;;</span><br><span class="line">    if(error != NULL)&#123;</span><br><span class="line">        *error = [NSError errorWithDomain:kUserInfoDomain code:AUIUserNotExist userInfo:errInfo];</span><br><span class="line">    &#125;</span><br><span class="line">    return nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>以上错误处理代码中需要注意的一点就是 error 的判断 <code>if(error != NULL)</code> 加这一行的作用是区分一下两种调用方式</p>
+        <p><code>@property</code> 和 <code>attribute</code> 的中文翻译都是属性，所以本文就只用英文做区分了。<code>property</code> 的不同 <code>attribute</code> 大致包含下面这些</p>
 <ol>
-<li><code>[self fetchUserInfoWithError:nil];</code></li>
-<li><code>NSError *error = nil; [self fetchUserInfoWithError:error];</code></li>
+<li>strong               //default</li>
+<li>weak</li>
+<li>copy</li>
+<li>assign               //default</li>
+<li>unsafe_unretained</li>
+<li>atomic &amp; nonatomic   //default atomic </li>
+<li>readonly &amp; readwrite //default readwrite </li>
 </ol>
-<p>如果是像前者一样调用的话，是不会走进这个 <code>if(error != NULL)</code>分支判断，我们没必要为这种情况单独初始化一个 <code>error</code> 实例。</p>
-<p>以上，在帮别的同事封装可调用 API 的时候增加必要的 NSError 参数，不仅方便别人，其实也是方便自己。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://nshipster.com/nserror/" target="_blank" rel="noopener">NSError</a><br><a href="https://stackoverflow.com/questions/3276127/best-practice-nserror-domains-and-codes-for-your-own-project-app" target="_blank" rel="noopener">Best Practice - NSError domains and codes for your own project/app</a></p>
+<p>接下来依次说一下这些 <code>attribute</code> 的用处，使用方法还有使用时的可能注意事项</p>
+<h2 id="strong"><a href="#strong" class="headerlink" title="strong"></a>strong</h2><p><code>strong</code> 是 <code>ARC</code> 引入的方便内存管理的一种 <code>attribute</code>，跟 <code>MRC</code> 属性中的<code>retain</code> 效果基本是一样的。区别在于编译器遇到 <code>strong</code> 修饰的变量的时候会自动为其在合适的地方插入一条 <code>release</code> 语句。相同的地方就是为了强引用属性。强引用的意思就是当前对象持有自己的属性对象，如果当前对象不释放的话这个属性也不会被释放，而当对象释放的时候，<code>ARC</code> 也会自动为我们处理属性的释放，不需要开发者关心。<code>strong</code> 是我们最常用的一个 <code>attribute</code>。</p>
+<p>几个说明：</p>
+<ol>
+<li><code>strong attribute</code> 和变量前的修饰符 <code>__strong</code> 在 <code>ARC</code> 里的作用是一样的。只不过一个修饰属性一个修饰变量而已。参考 <a href="http://clang.llvm.org/docs/AutomaticReferenceCounting.html#property-declarations" target="_blank" rel="noopener">Property declarations</a></li>
+<li><p><code>strong</code> 不能用来修饰非对象。否则编译器会报错 </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Property with retain(or strong) attribute must be object type</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>一般如果某个属性前面不需要显式地写出 <code>strong</code> 编译器会自动认为这是 <code>strong</code> 类型的属性。</p>
+</li>
+<li><p><code>strong</code> 修饰符会自动处理以下两种 case,而引用计数不会出现异常。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;// 自己生成并持有对象</span><br><span class="line">    id __strong obj = [[NSObject alloc] init];</span><br><span class="line">&#125;</span><br><span class="line">&#123; // 非自己生成并持有对象.</span><br><span class="line">    id __strong obj = [NSMutableArray array];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>objc_storeStrong</code> 方法的说明，当向一个 <code>__strong</code> 修饰符修饰的对象赋值的时候跟执行下面代码是一样的效果。说白了就是执行了 <code>objc_storeStrong</code> 的方法。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//Precondition: object is a valid pointer to a __strong object which </span><br><span class="line">//is adequately aligned for a pointer. value is null or a pointer to a valid object.</span><br><span class="line">void objc_storeStrong(id *object, id value) &#123;</span><br><span class="line">  id oldValue = *object;</span><br><span class="line">  value = [value retain];</span><br><span class="line">  *object = value;</span><br><span class="line">  [oldValue release];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 值得说明的是 <code>FRObject *obj = [FRObject frobj];</code> 和 <code>FRObject *obj = temp;</code> 这两句代码编译器的处理是不一样的。第二句会执行如上 <code>objc_storeStrong</code> 的方法，但是第一句不会。我个人理解原因是 <code>obj</code> 初始化的时候并没有 <code>oldValue</code>，所以没有必要这么做。</p>
+</li>
+</ol>
+<h2 id="weak"><a href="#weak" class="headerlink" title="weak"></a>weak</h2><p><code>weak</code> 也是 <code>ARC</code> 引入的方便内存管理的一种 <code>attribute</code>，跟 <code>assign</code> 效果基本是一样的。区别在于在对象被释放的时候，<code>weak</code> 机制会自动将对象置为 nil,保证后续访问这个对象不会因为野指针闪退。</p>
+<p>真正引入 <code>weak</code> 的原因是 <code>weak</code> 能解决引起内存泄露的循环引用问题。</p>
+<p>几个说明：</p>
+<ol>
+<li><code>weak</code> 和 <code>strong</code> 一样只能用来修饰对象。</li>
+<li><code>weak attribute</code> 和变量前的修饰符 <code>__weak</code> 在 <code>ARC</code> 里的作用是一样的。</li>
+</ol>
+<h2 id="copy"><a href="#copy" class="headerlink" title="copy"></a>copy</h2><p><code>copy</code> 要求它修饰的属性必须实现 <code>NSCopy</code> 协议。本质上，当 <code>copy</code> 修饰的属性被赋值的时候，新值会收到一个 <code>copyWithZone</code> 方法，旧的值会被 release。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//clang 编译后的源码</span><br><span class="line"> static void _I_Fan_setName_(Fan * self, SEL _cmd, NSString *name) &#123; </span><br><span class="line"> objc_setProperty (self, _cmd, __OFFSETOFIVAR__(struct Fan, _name), (id)name, 1, 1); </span><br><span class="line"> &#125;</span><br><span class="line"> //runtime 里的对应方法</span><br><span class="line"> void objc_setProperty(id self, SEL _cmd, ptrdiff_t offset, id newValue, BOOL atomic, signed char shouldCopy)</span><br><span class="line"> //reallySetProperty 有对应 copy 属性的具体实现.</span><br></pre></td></tr></table></figure>
+<p><code>copy</code> 的使用场景通常是你希望属性在赋值后一直保持值不变，而不是跟着它指向的对象一直变。讨论比较多的是 <code>NSString</code> 是应该用 <code>copy</code> 还是用 <code>strong</code> 去修饰</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@property (atomic) NSString *name;</span><br><span class="line"></span><br><span class="line">NSMutableString *nameString = [NSMutableString stringWithString:@&quot;John&quot;];</span><br><span class="line">Fan *fan = [[Fan alloc] init];</span><br><span class="line">fan.name = nameString;</span><br><span class="line">NSLog(@&quot;fan.name = %@ %p&quot;,fan.name,fan.name);</span><br><span class="line">[nameString appendString:@&quot;ny&quot;];</span><br><span class="line">NSLog(@&quot;fan.name = %@ %p&quot;,fan.name,fan.name);</span><br><span class="line">//输出结果如下</span><br><span class="line">2018-01-11 20:35:18.763988+0800 TTTTT[71790:3384299] fan.name = John 0x10051e9c0</span><br><span class="line">2018-01-11 20:35:18.764449+0800 TTTTT[71790:3384299] fan.name = Johnny 0x10051e9c0</span><br></pre></td></tr></table></figure>
+<p>可以看到 <code>fan.name</code> 在没有显式修改的时候被改掉了，这种情况出现在 <code>NSString</code> 指针子类 <code>NSMutableString</code> 的情况下，而 <code>NSMutablString</code> 的修改不会对本身地址产生影响。使用 <code>copy</code> 可以避免。个人觉得使用 <code>copy</code> 还是 <code>strong</code> 还是根据实际情况，如果出了问题知道为什么就好了。</p>
+<h2 id="assign"><a href="#assign" class="headerlink" title="assign"></a>assign</h2><p>值得注意的是 <code>MRC</code> 时代和 <code>ARC</code> 时代的 <code>assign</code> 使用多少有点区别的。<code>MRC</code> 的 <code>assign</code> 是可以修饰对象还有普通基本类型，因为你根本也没得选。但是 <code>ARC</code> 下虽然 <code>assgin</code> 也都可以修饰基本类型和对象，但是通常修饰对象的话不会用 <code>assign</code> ，因为缺少了 <code>weak</code> 修饰变量被释放时候置为 <code>nil</code> 的特性，很有可能出现内存问题。所以我们现在用 <code>assign</code> 修饰基本类型就好了，需要弱引用的时候用 <code>weak</code> 用来修饰对象。规则也比较明确。</p>
+<h2 id="unsafe-unretained"><a href="#unsafe-unretained" class="headerlink" title="unsafe_unretained"></a>unsafe_unretained</h2><p><code>unsafe_unretained</code> 其实就是阉割版本的 <code>weak</code> 实现，它缺少正是对象释放时候置为 <code>nil</code> 的特性。但是 <code>unsafe_unretained</code> 还能修饰基本数据类型，<code>weak</code> 不行。</p>
+<p>看起来，我们使用 weak 就好了为啥要用 <code>unsafe_unretained</code> 这个属性呢。答案是因为 <code>__weak</code> 只支持 <code>iOS 5.0</code> 和 <code>OS X Mountain Lion</code> 作为部署版本，如果是想要兼容更低的支持 ARC 的版本，比如你想部署回 <code>iOS 4.0</code> 和 <code>OS X Snow Leopark</code> 就不得不使用 <code>unsafe_unretained</code>。</p>
+<p>还有一种说法是 <code>weak</code> 底层实现比较繁琐消耗性能，我认为与 <code>weak</code> 带来的好处相比，这点消耗可以忽略。</p>
+<h2 id="atomic-amp-nonatomic"><a href="#atomic-amp-nonatomic" class="headerlink" title="atomic &amp; nonatomic"></a>atomic &amp; nonatomic</h2><p><code>atomic</code> 和 <code>nonatomic</code> 区别在于向属性对应成员变量赋值的时候是否为原子写入，即能不能够保证安全写入，从这一点上 <code>atomic</code> 确实是安全的。但是 <code>atomic</code> 并非是线程安全的，因为 <code>atomic</code> 控制的粒度太细了。</p>
+<p>举个例子，A 线程向属性写入一个值，A 线程后续再次读这个值之前，可能 B 线程也向同样的属性里写入另外一个值，这样 A 线程读取的时候并非读到的是自己刚写入的值而是一个预期之外的值。</p>
+<p>从这一点上看 <code>atomic</code> 似乎用处不是很大，同时 <code>atomic</code> 底层是用锁实现的，频繁写入会影响性能。个人认为最好的实践是，使用 <code>nonatomic</code> 然后自己去处理线程相关的东西。</p>
+<p>几个说明：</p>
+<ol>
+<li><code>atomic</code> 是默认属性。比如 <code>@property NSString *name;</code> 这种属性默认就是 <code>atomic</code> 修饰的。</li>
+<li><code>atomic</code> 的底层实现里，赋值和读取值都有锁的保护，而且使用的都是一个锁。</li>
+<li><p><code>atomic</code> 不允许开发者自己复写其 <code>getter</code> 方法，强制复写会得到一个警告。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#Writable atomic property &apos;name&apos; cannot pair a synthesized setter with a user defined getter</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="readonly-amp-readwrite"><a href="#readonly-amp-readwrite" class="headerlink" title="readonly &amp; readwrite"></a>readonly &amp; readwrite</h2><p><code>readonly</code> 和 <code>readwrite</code> 其实就是编译器级别帮你做了只读和读写的处理。<br><code>readonly</code> 是告诉编译器不用生成 <code>setter</code> 方法，同时如果你对这个 <code>readonly</code> 属性赋值的时候编译器会报错  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#Assignment to readonly property</span><br></pre></td></tr></table></figure>
+<p><code>readwrite</code> 是默认的属性，它会告诉编译器自动生成 <code>setter</code> 和 <code>getter</code> 方法。开发者可以随意复写这两个方法来满足自己的时机情况。</p>
+<h2 id="补充关于自动合成属性的声明。"><a href="#补充关于自动合成属性的声明。" class="headerlink" title="补充关于自动合成属性的声明。"></a>补充关于自动合成属性的声明。</h2><p><code>Clang</code> 提供了对已声明属性自动合成的支持。这个功能提供了没有被 <code>@dynamic</code> 修饰的属性的 <code>getter</code> 和 <code>setter</code> 方法，而不用用户手动添加。</p>
+<p>Clang provides support for autosynthesis of declared properties. Using this feature, clang provides default synthesis of those properties not declared @dynamic and not having user provided backing getter and setter methods. __has_feature(objc_default_synthesize_properties) checks for availability of this feature in version of clang being used.</p>
+<h2 id="一些面试时常遇到的-QA"><a href="#一些面试时常遇到的-QA" class="headerlink" title="一些面试时常遇到的 QA"></a>一些面试时常遇到的 QA</h2><p><strong>Q: assign, weak 和 unsafe_unretained 的区别?</strong><br>A: assign 和 unsafe_unretained 是等价的。weak 和它们区别是在对象释放的时候增加了将其置为 <code>nil</code> 的功能。</p>
+<p><strong>Q: atomic 是不是线程安全的？</strong><br>A: 参考上面说明.</p>
+<p><strong>Q: <code>@property NSString *name;</code> 这个属性的 <code>attribute</code> 是?</strong><br>A: strong,atomic,readwrite. </p>
+<p>参考<br><a href="https://developer.apple.com/library/content/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html" target="_blank" rel="noopener">Transitioning to ARC Release Notes</a><br><a href="http://clang.llvm.org/docs/AutomaticReferenceCounting.html" target="_blank" rel="noopener">Objective-C Automatic Reference Counting (ARC)</a><br><a href="http://www.vanbein.com/posts/ios基础/2015/12/08/propertyshu-xing-xiu-shi-fu-zong-jie/" target="_blank" rel="noopener">property属性修饰符总结</a><br><a href="http://www.ios-blog.co.uk/tutorials/objective-c/objective-c-property-attribute-reference-guide/" target="_blank" rel="noopener">Objective-C: Property Attribute Reference Guide</a><br><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/EncapsulatingData/EncapsulatingData.html#//apple_ref/doc/uid/TP40011210-CH5-SW6" target="_blank" rel="noopener">Encapsulating Data</a><br><a href="http://rdcworld-iphone.blogspot.in/2012/12/variable-property-attributes-or.html" target="_blank" rel="noopener">Variable property attributes or Modifiers in iOS</a></p>
 
       
     </div>
@@ -388,8 +439,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/28/Bonjour-的理解/" rel="next" title="Bonjour 的理解">
-                <i class="fa fa-chevron-left"></i> Bonjour 的理解
+              <a href="/2018/01/06/属性和运行时/" rel="next" title="属性和运行时">
+                <i class="fa fa-chevron-left"></i> 属性和运行时
               </a>
             
           </div>
@@ -398,8 +449,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/06/属性和运行时/" rel="prev" title="属性和运行时">
-                属性和运行时 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/01/11/属性自动合成/" rel="prev" title="属性自动合成">
+                属性自动合成 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -534,7 +585,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#NSError-的使用"><span class="nav-number">1.</span> <span class="nav-text"><a href="#NSError-&#x7684;&#x4F7F;&#x7528;" class="headerlink" title="NSError &#x7684;&#x4F7F;&#x7528;"></a>NSError &#x7684;&#x4F7F;&#x7528;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#strong"><span class="nav-number">1.</span> <span class="nav-text"><a href="#strong" class="headerlink" title="strong"></a>strong</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weak"><span class="nav-number">2.</span> <span class="nav-text"><a href="#weak" class="headerlink" title="weak"></a>weak</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy"><span class="nav-number">3.</span> <span class="nav-text"><a href="#copy" class="headerlink" title="copy"></a>copy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assign"><span class="nav-number">4.</span> <span class="nav-text"><a href="#assign" class="headerlink" title="assign"></a>assign</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#unsafe-unretained"><span class="nav-number">5.</span> <span class="nav-text"><a href="#unsafe-unretained" class="headerlink" title="unsafe_unretained"></a>unsafe_unretained</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#atomic-amp-nonatomic"><span class="nav-number">6.</span> <span class="nav-text"><a href="#atomic-amp-nonatomic" class="headerlink" title="atomic &amp; nonatomic"></a>atomic &amp; nonatomic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#readonly-amp-readwrite"><span class="nav-number">7.</span> <span class="nav-text"><a href="#readonly-amp-readwrite" class="headerlink" title="readonly &amp; readwrite"></a>readonly &amp; readwrite</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补充关于自动合成属性的声明。"><span class="nav-number">8.</span> <span class="nav-text"><a href="#&#x8865;&#x5145;&#x5173;&#x4E8E;&#x81EA;&#x52A8;&#x5408;&#x6210;&#x5C5E;&#x6027;&#x7684;&#x58F0;&#x660E;&#x3002;" class="headerlink" title="&#x8865;&#x5145;&#x5173;&#x4E8E;&#x81EA;&#x52A8;&#x5408;&#x6210;&#x5C5E;&#x6027;&#x7684;&#x58F0;&#x660E;&#x3002;"></a>&#x8865;&#x5145;&#x5173;&#x4E8E;&#x81EA;&#x52A8;&#x5408;&#x6210;&#x5C5E;&#x6027;&#x7684;&#x58F0;&#x660E;&#x3002;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些面试时常遇到的-QA"><span class="nav-number">9.</span> <span class="nav-text"><a href="#&#x4E00;&#x4E9B;&#x9762;&#x8BD5;&#x65F6;&#x5E38;&#x9047;&#x5230;&#x7684;-QA" class="headerlink" title="&#x4E00;&#x4E9B;&#x9762;&#x8BD5;&#x65F6;&#x5E38;&#x9047;&#x5230;&#x7684; QA"></a>&#x4E00;&#x4E9B;&#x9762;&#x8BD5;&#x65F6;&#x5E38;&#x9047;&#x5230;&#x7684; QA</span></a></li></ol></div>
             
 
           </div>

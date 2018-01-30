@@ -82,7 +82,7 @@
 <meta property="og:site_name" content="FanFrank&#39;s Site">
 <meta property="og:description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-29T09:37:49.000Z">
+<meta property="og:updated_time" content="2018-01-29T14:21:43.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NSError 最佳实践">
 <meta name="twitter:description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
@@ -260,6 +260,744 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/15/AutoreleasePool-理解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FanFrank">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FanFrank's Site">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/15/AutoreleasePool-理解/" itemprop="url">AutoreleasePool 理解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-15T10:39:51+08:00">2018-01-15</time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/15/AutoreleasePool-理解/" class="leancloud_visitors" data-flag-title="AutoreleasePool 理解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>从一些问题开始</p>
+<ol>
+<li>什么是 <code>AutoreleasePool</code> ? 说明一下 <code>NSAutoreleasePool</code> 具体机制?</li>
+<li>ARC 时代和 MRC 时代的 <code>AutoreleasePool</code> 机制有什么区别？</li>
+<li><code>AutoreleasePool</code> 的实现机制?</li>
+<li><code>AutoreleasePool</code> 和 NSRunloop 有什么关系？</li>
+<li><code>AutoreleasePool</code> 和线程有什么关系?</li>
+<li>什么时候需要我们手动创建 <code>AutoreleasePool</code> ?</li>
+</ol>
+<h2 id="什么是-AutoreleasePool-如何理解-NSAutoreleasePool"><a href="#什么是-AutoreleasePool-如何理解-NSAutoreleasePool" class="headerlink" title="什么是 AutoreleasePool ? 如何理解 NSAutoreleasePool?"></a>什么是 AutoreleasePool ? 如何理解 NSAutoreleasePool?</h2><p><code>NSAutoreleasePool</code> 对象的官方说明是一个支持 <code>Cocoa</code> 引用计数式内存管理的一个对象。 当池子排掉的时候向池子内存储的对象发送 <code>release</code> 消息。</p>
+<blockquote>
+<p>An object that supports Cocoa’s reference-counted memory management system.<br>An autorelease pool stores objects that are sent a release message when the pool itself is drained.</p>
+</blockquote>
+<p>具体机制说明：<br>在引用计数式的内存管理中，<code>NSAutoreleasePool</code> 对象包含了收到了 <code>_autorelease</code> 消息的对象，这些 <code>autorelease</code> 对象（我们称被标记了 <code>__autorelease</code> 的对象为 <code>autorelease</code> 对象）的生命周期被延长到了这个 <code>NSAutoreleasePool</code> drain 的时候。也可以这么说 <code>autorelease</code> 和 <code>release</code> 的区别仅仅是 <code>autorelease</code> 是延时释放(即等待 <code>AutoreleasePool drain</code>) 而 <code>release</code> 是立即释放。</p>
+<p>感觉说到这儿，其实我们可以说 <code>NSAutoreleasePool</code> 就是一个帮助我们管理内存的一个工具。</p>
+<p>其实不光是我们自己可以手动创建 <code>NSAutoreleasePool</code> 对象，系统也帮我们维护了一个 <code>NSAutoreleasePool</code> 对象，在 <code>runloop</code> 迭代中不断 <code>Push</code> 和 <code>Pop</code>，从而不会堆积过多的 <code>autorelease</code> 对象引起内存疯长。你可能会好奇，哪会有那么多 <code>autorelease</code> 对象？举个例子来看一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    // str 其实是一个 autorelease 对象</span><br><span class="line">    NSString *str = [NSString stringWithFormat:@&quot;sunnyxx&quot;];</span><br><span class="line">    reference = str;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题外话：为啥  str 是一个 <code>autorelease</code> 对象呢？<br>这个就需要知道下内存管理的知识了，使用 <code>alloc</code>,<code>new</code>,<code>copy</code>和<code>mutableCopy</code>这些关键字生成的对象是自己持有，反之不是（参考 <a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmRules.html#//apple_ref/doc/uid/20000994-SW1" target="_blank" rel="noopener">Memory Management Policy</a>）。使用 <code>stringWithFormat:</code> 类方法生成的 <code>str</code> 没有持有它的对象，只能通过 <code>autorelease</code> 这种方式来延长它的生命周期。具体 <code>autorelease</code> 的时机是在 <code>stringWithFormat</code> 内部做的。</p>
+<p><code>Cocoa</code> 的 <code>Framework</code> 里大量生成了 <code>autorelease</code> 的对象，所以官方说明里 <code>Cocoa</code> 代码执行是预期在一个 <code>autorelease</code> 环境中。</p>
+<h2 id="ARC-时代和-MRC-时代的-AutoreleasePool-机制有什么区别？"><a href="#ARC-时代和-MRC-时代的-AutoreleasePool-机制有什么区别？" class="headerlink" title="ARC 时代和 MRC 时代的 AutoreleasePool 机制有什么区别？"></a>ARC 时代和 MRC 时代的 AutoreleasePool 机制有什么区别？</h2><p>没啥根本区别，只是写法稍有不同。看两个 ARC 和 MRC 时代 <code>autorelease</code> 的两个经典写法。</p>
+<p>MRC 的 case:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NSAutoreleasePool *pool = [[NSAutorelease alloc] init];</span><br><span class="line">id obj = [[NSObject alloc] init];</span><br><span class="line">[obj autorelease];</span><br><span class="line">[pool drain];</span><br></pre></td></tr></table></figure>
+<p>ARC 的 case(注:<a href="https://developer.apple.com/documentation/foundation/nsautoreleasepool#//apple_ref/occ/cl/NSAutoreleasePool" target="_blank" rel="noopener">其实 MRC 也可以这么写</a>):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@autoreleasepool &#123;</span><br><span class="line">    //_autorelease 为所有权修饰符。</span><br><span class="line">    id _autorelease obj = [[NSObject alloc] init];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ARC</code> 中的几点变化：</p>
+<ol>
+<li><code>ARC</code> 中是不能使用 <code>autorelease</code> 方法，也不能使用 <code>NSAutoreleasePool</code> 类。</li>
+<li><code>ARC</code> 系统提供了 <code>@autoreleasepool</code> 块来替代 <code>NSAutoreleasePool</code> 对象的生成持有以及废弃的功能。</li>
+<li><p>通过将对象赋值给附加了 <code>__autoreleaseing</code> 修饰符变量来替代调用 <code>autorelease</code> 方法。即</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">id obj = [[NSObject alloc] init];</span><br><span class="line">[obj autorelease];</span><br></pre></td></tr></table></figure>
+<p> 等价于</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id _autorelease obj = [[NSObject alloc] init];</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>一般我们不会显式的去使用 <code>__autorelease</code> 修饰符，因为ARC 下编译器帮我们做了一些工作，即编译器会检查方法是否以 <code>alloc/new/copy/mutableCopy</code> 开始，如果不是的话将返回的值对象注册到 <code>autoreleasePool</code>。</p>
+<p>不需要显式地写 <code>__autorelease</code> 的几种场景</p>
+<ol>
+<li><p>自动释放池随意生成对象，不需要显式地添加 <code>autorelease</code>。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@autoreleasepool &#123;</span><br><span class="line">    //默认的 strong 修饰符会自动处理这种情况.</span><br><span class="line">    id obj = [[NSObject alloc] init];  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>函数返回值的场景</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+ (NSArray *)array &#123;</span><br><span class="line">    id obj = [[NSMutableArray alloc] init];</span><br><span class="line">    return obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 在 MRC 时代，obj 是需要被发送 <code>autorelease</code> 方法的，ARC 时代不需要这么做，这个对象作为函数的返回值会自动被注册到 <code>autoreleasePool</code> 中</p>
+</li>
+<li><p>访问 <code>weak</code> 变量的时肯定会涉及到 <code>autoreleasePool</code></p>
+<p> 因为 <code>weak</code> 对对象是弱引用，对象随时会被释放，但是使用 <code>autoreleasePool</code> 会延时释放，保证 <code>weak</code> 访问过程中不会出现对象被释放这种状况。</p>
+</li>
+<li><p><code>NSObject **obj</code> 其实就是 <code>NSObject *_autorelease * obj</code>。<br> 因为<a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmRules.html#//apple_ref/doc/uid/20000994-SW1" target="_blank" rel="noopener">我们不持有通过引用返回的对象</a>。这种情况只能是 <code>autorelease</code>。</p>
+</li>
+</ol>
+<h2 id="AutoreleasePool-的实现机制"><a href="#AutoreleasePool-的实现机制" class="headerlink" title="AutoreleasePool 的实现机制?"></a>AutoreleasePool 的实现机制?</h2><h3 id="分析过程"><a href="#分析过程" class="headerlink" title="分析过程"></a>分析过程</h3><p>对以下代码所在文件执行 <code>clang -rewrite-objc xx.m</code> 重写命令，可以看到 OC 对应的 C++ 的源码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        NSLog(@&quot;Hello, World!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>转换后的 C++ 代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    /* @autoreleasepool */ &#123; __AtAutoreleasePool __autoreleasepool; </span><br><span class="line">        NSLog((NSString *)&amp;__NSConstantStringImpl__var_folders_9w_q4lvthyn17v0cxxm5s7fsb500000gn_T_main_1280f1_mi_0);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到 <code>@autoreleasepool</code> 被转换为一个名为 <code>__AtAutoreleasePool</code> 的数据结构。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct __AtAutoreleasePool &#123;</span><br><span class="line">  __AtAutoreleasePool() &#123;atautoreleasepoolobj = objc_autoreleasePoolPush();&#125;</span><br><span class="line">  ~__AtAutoreleasePool() &#123;objc_autoreleasePoolPop(atautoreleasepoolobj);&#125;</span><br><span class="line">  void * atautoreleasepoolobj;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>main 函数其实可以理解为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    &#123; </span><br><span class="line">        void *atautoreleasepoolobj = objc_autoreleasePoolPush();</span><br><span class="line">        NSLog((NSString *)&amp;__NSConstantStringImpl__var_folders_9w_q4lvthyn17v0cxxm5s7fsb500000gn_T_main_1280f1_mi_0);</span><br><span class="line">        objc_autoreleasePoolPop(atautoreleasepoolobj);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>具体 <code>objc_autoreleasePoolPush</code> 和 <code>objc_autoreleasePoolPop</code> 的实现在 runtime 源码 <code>NSObject.mm</code>中可以找到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void * objc_autoreleasePoolPush(void) &#123;</span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;</span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="AutoreleasePoolPage-的介绍"><a href="#AutoreleasePoolPage-的介绍" class="headerlink" title="AutoreleasePoolPage 的介绍"></a><code>AutoreleasePoolPage</code> 的介绍</h3><p>这里涉及到了 <code>AutoreleasePoolPage</code> 这个数据结构，接下来就看下 <code>AutoreleasePoolPage</code> 这个数据结构是啥样的？<code>AutoreleasePoolPage</code> 是个 C++ 的类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class AutoreleasePoolPage  &#123;</span><br><span class="line">    magic_t const magic;    //magic 用于对当前 AutoreleasePoolPage 完整性的校验</span><br><span class="line">    id *next;               //当前 autoreleasePoolPage 最上层的对象的指针。</span><br><span class="line">    pthread_t const thread; //thread 保存了当前页所在的线程</span><br><span class="line">    AutoreleasePoolPage * const parent;//指向上一个 AutoreleasePoolPage 对象.</span><br><span class="line">    AutoreleasePoolPage *child; //指向下一个 AutoreleasePoolPage 对象.</span><br><span class="line">    uint32_t const depth;</span><br><span class="line">    uint32_t hiwat;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>关于 <code>AutoreleasePoolPage</code> 的说明</strong></p>
+<ol>
+<li><p>可以看到其实并没有一个整体的自动释放池对象，自动释放池是由一个双向链表构成。当一个 <code>AutoreleasePoolPage</code> 的空间被占满之后继续创建新的 <code>AutoreleasePoolPage</code> 对象。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">//child 指向的是下一个 AutoreleasePoolPage 对象的指针</span><br><span class="line">// 这个方法是当前 page 如果满的情况下创建新的 page.</span><br><span class="line">id *autoreleaseFullPage(id obj, AutoreleasePoolPage *page) &#123;</span><br><span class="line">    do &#123;</span><br><span class="line">        if (page-&gt;child) page = page-&gt;child;</span><br><span class="line">        else page = new AutoreleasePoolPage(page);</span><br><span class="line">    &#125; while (page-&gt;full());</span><br><span class="line">    ....</span><br><span class="line">    return page-&gt;add(obj);</span><br><span class="line">&#125;</span><br><span class="line">// 初始化 pool 的方法 在这个里面对 parent 和 child 进行了赋值.</span><br><span class="line">AutoreleasePoolPage(AutoreleasePoolPage *newParent) </span><br><span class="line">    : magic(), next(begin()), thread(pthread_self()),</span><br><span class="line">      parent(newParent), child(nil), </span><br><span class="line">      depth(parent ? 1+parent-&gt;depth : 0), </span><br><span class="line">      hiwat(parent ? parent-&gt;hiwat : 0) &#123; </span><br><span class="line">    if (parent) &#123;</span><br><span class="line">        parent-&gt;child = this;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>每个 <code>AutoreleasePoolPage</code> 对象都存储着当前的线程 <code>id</code> 参考上面的 <code>AutoreleasePoolPage</code> 的初始化方法。使用 <code>pthread_self()</code> 拿到当前的线程 <code>id</code> 然后保存到 <code>thread</code> 成员变量里。</p>
+</li>
+<li><p><code>AutoreleasePoolPage</code> 的内存大小是 4096 个字节。是 80386 机器上的每页的字节数。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//初始化 AutoreleasePoolPage 的方法,size 是个宏定义的 4096</span><br><span class="line">static void * operator new(size_t size) &#123;</span><br><span class="line">    return malloc_zone_memalign(malloc_default_zone(), SIZE, SIZE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>AutoreleasePoolPage</code> 存储 <code>autorelease</code> 对象是通过自己内部的 <code>next</code> 指针去实现。从实现上可以看到 <code>AutoreleasePoolPage</code> 还是从低内存地址向高内存地址增长。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id *add(id obj) &#123;</span><br><span class="line">    id *ret = next;  // faster than `return next-1` because of aliasing</span><br><span class="line">    *next++ = obj;</span><br><span class="line">    return ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 由此大致能得到 <code>AutoreleasePoolPage</code> 的内存结构如图（来自 Sunny 大神博客）<br> <img src="/media/Jietu20180125-103109.png" alt="Jietu20180125-103109"></p>
+</li>
+</ol>
+<h3 id="autorelease-消息调用栈"><a href="#autorelease-消息调用栈" class="headerlink" title="autorelease 消息调用栈"></a>autorelease 消息调用栈</h3><p>了解了这个数据结构后看下 <code>autorelease</code> 消息的调用栈。</p>
+<p><img src="/media/15168026389568.jpg" alt=""><br>我们看下 <code>AutoreleasePoolPage</code> 中 <code>autorelease</code> 方法实现其实就是将 <code>autorelease</code> 对象存储到 <code>AutoreleasePoolPage</code> 的过程。下面是大致实现的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">static inline id autorelease(id obj) &#123;</span><br><span class="line">    ...</span><br><span class="line">    id *dest __unused = autoreleaseFast(obj);</span><br><span class="line">    ...</span><br><span class="line">    return obj;</span><br><span class="line">&#125;</span><br><span class="line">//这个是将 obj 存入 AutoreleasePoolPage 的方法。</span><br><span class="line">static inline id *autoreleaseFast(id obj) &#123;</span><br><span class="line">    //hotPage 应该是去 TLS(线程本地存储) 中获取 AutoreleasePoolPage。</span><br><span class="line">    //如果是程序刚启动的话，这儿肯定拿到的空。</span><br><span class="line">    AutoreleasePoolPage *page = hotPage();</span><br><span class="line">    if (page &amp;&amp; !page-&gt;full()) &#123;</span><br><span class="line">        // AutoreleasePoolPage 不满的时候直接往进加</span><br><span class="line">        return page-&gt;add(obj); //绝大多数情况我们走的都是这个分支。</span><br><span class="line">    &#125; else if (page) &#123;</span><br><span class="line">        // AutoreleasePoolPage 满了，则创建新的 page，将 obj 放到新的 page 里去.</span><br><span class="line">        return autoreleaseFullPage(obj, page);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        // 创建新的 page.</span><br><span class="line">        return autoreleaseNoPage(obj);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="autorelease-pop-消息"><a href="#autorelease-pop-消息" class="headerlink" title="autorelease pop 消息"></a>autorelease pop 消息</h3><p>对应 <code>push</code> 的是 <code>pop</code>，<code>pop</code> 即为将存储到 <code>AutoreleasePoolPage</code> 的对象释放对应原型为 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;</span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意的是这里并没有直接传入对象，而是传入了一个 <code>ctxt</code> 的指针，根据内部实现来看，自动释放池根据 <code>ctxt</code> 拿到它当前所在的 <code>AutoreleasePoolPage</code> ，然后将 <code>AutoreleasePoolPage</code> 的 <code>ctxt</code> 的位置开始到到最新的 <code>AutoreleasePoolPage</code> 存储的 <code>autorelease</code> 对象全部释放。即我们可以理解为自动释放池代码块儿开始的时候会在 <code>AutoreleasePoolPage</code> 进行一个占位，然后将后续的 <code>autorelease</code> 对象都放到占位后，这样就能确定当前自动释放池块儿里的对象是从哪到哪，理解了这一点也就能理解 <code>autorelease</code> 的嵌套实现了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">static inline void pop(void *token)  &#123;</span><br><span class="line">    AutoreleasePoolPage *page; id *stop;</span><br><span class="line">    ..</span><br><span class="line">    page = pageForPointer(token); //拿到 token 所在的 AutoreleasePoolPage</span><br><span class="line">    stop = (id *)token;</span><br><span class="line">    if (*stop != POOL_BOUNDARY) &#123;</span><br><span class="line">        if (stop == page-&gt;begin()  &amp;&amp;  !page-&gt;parent) &#123;</span><br><span class="line">            // Start of coldest page may correctly not be POOL_BOUNDARY:</span><br><span class="line">            // 1. top-level pool is popped, leaving the cold page in place</span><br><span class="line">            // 2. an object is autoreleased with no pool</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            return badPop(token);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if (PrintPoolHiwat) printHiwat();</span><br><span class="line">    page-&gt;releaseUntil(stop);  //一直释放对象到 token 的位置.</span><br><span class="line">&#125;</span><br><span class="line">//一直释放对象的函数</span><br><span class="line">void releaseUntil(id *stop)  &#123;</span><br><span class="line">    while (this-&gt;next != stop) &#123;</span><br><span class="line">        AutoreleasePoolPage *page = hotPage(); //拿到当前的 page.</span><br><span class="line">        id obj = *--page-&gt;next; </span><br><span class="line">        memset((void*)page-&gt;next, SCRIBBLE, sizeof(*page-&gt;next));</span><br><span class="line">        if (obj != POOL_BOUNDARY) &#123;</span><br><span class="line">            objc_release(obj);  //取出对象不断发送 relesse 消息..</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    setHotPage(this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="AutoreleasePool-和-NSRunloop-有什么关系？"><a href="#AutoreleasePool-和-NSRunloop-有什么关系？" class="headerlink" title="AutoreleasePool 和 NSRunloop 有什么关系？"></a>AutoreleasePool 和 NSRunloop 有什么关系？</h2><p>先来个实例看下 <code>Runloop</code> 是什么东西。建一个普通的 Single View App 工程。点击按钮然后在按钮点击事件里打印</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (void)btnPressed:(id)sender &#123;</span><br><span class="line">    NSRunLoop *runloop = [NSRunLoop currentRunLoop]; </span><br><span class="line">    //在这里打断点然后 po runloop 得到下面结果。（省略大部分无关内容）</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">(lldb) po runloop </span><br><span class="line">common mode items = &lt;CFBasicHash 0x604000249360 [0x110875bb0]&gt;</span><br><span class="line">	1 : &lt;CFRunLoopObserver 0x6040001370c0 [0x110875bb0]&gt;&#123;valid = Yes, activities = 0x1, repeats = Yes, order = -2147483647, callout = _wrapRunLoopWithAutoreleasePoolHandler (0x110a24276), ....</span><br><span class="line">	......</span><br><span class="line">	4 : &lt;CFRunLoopObserver 0x604000136ee0 [0x110875bb0]&gt;&#123;valid = Yes, activities = 0xa0, repeats = Yes, order = 2147483647, callout = _wrapRunLoopWithAutoreleasePoolHandler (0x110a24276), ....</span><br></pre></td></tr></table></figure>
+<p>注意看上面的 <code>activities</code>,它对应的定义是这里</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Run Loop Observer Activities */</span><br><span class="line">typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) &#123;</span><br><span class="line">    kCFRunLoopEntry = (1UL &lt;&lt; 0),</span><br><span class="line">    kCFRunLoopBeforeTimers = (1UL &lt;&lt; 1),</span><br><span class="line">    kCFRunLoopBeforeSources = (1UL &lt;&lt; 2),</span><br><span class="line">    kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5),</span><br><span class="line">    kCFRunLoopAfterWaiting = (1UL &lt;&lt; 6),</span><br><span class="line">    kCFRunLoopExit = (1UL &lt;&lt; 7),</span><br><span class="line">    kCFRunLoopAllActivities = 0x0FFFFFFFU</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可以确定 <code>Autorelease</code> 机制在 <code>Runloop</code> 进入和退出(和休眠前触发) <code>CommonMode</code> 的时候进行观察，当 <code>Runloop</code> 运行到指定的时机的时候回触发 <code>_wrapRunLoopWithAutoreleasePoolHandler</code> 回调方法。</p>
+<p><code>_wrapRunLoopWithAutoreleasePoolHandler</code> 这个方法的实现其实我们并不清楚，网上没有找到对应的实现，不过我们可以打下符号断点来看看有没有线索。果然应用刚启动就执行了这些方法。看左侧的调用栈确实是从 Observer 的回调执行过来的。下面两个是我们熟悉的 Pop 和 Push 操作，<strong>基本上可以确认，<code>Autorelease</code> 机制是在进入 <code>Runloop</code> 的时候就创建了一个新的 <code>AutoreleasePoolPage</code>。退出或者休眠的的时候回收 <code>AutoreleasePoolPage</code>。</strong></p>
+<p> <img src="/media/15170502117985.jpg" alt=""></p>
+<h2 id="AutoreleasePool-和线程有什么关系"><a href="#AutoreleasePool-和线程有什么关系" class="headerlink" title="AutoreleasePool 和线程有什么关系?"></a>AutoreleasePool 和线程有什么关系?</h2><p><code>Cocoa</code> 应用程序里的每个线程会自动维护一个释放池，就是通过上面 <code>Runloop</code> 的方式。但是如果没有 <code>Runloop</code> 呢？</p>
+<p>之前看到有人问了一个问题：子线程默认不会开启 <code>Runloop</code>，那出现 <code>Autorelease</code> 对象如何处理？不手动处理会内存泄漏吗？<br>答案是不会。 </p>
+<p>具体 demo 如下 <a href="https://stackoverflow.com/questions/24952549/does-nsthread-create-autoreleasepool-automatically-now" target="_blank" rel="noopener">参考</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(test) object:nil];</span><br><span class="line">    [thread start];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(void)test &#123;</span><br><span class="line">    MyClass *my = [[[MyClass alloc] init] autorelease];</span><br><span class="line">    NSLog(@&quot;%@&quot;,[my description]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后的结果是 <code>MyClass</code> 实例被释放掉了。理论上来说子线程并没有 <code>Runloop</code> 也就没有自动释放池观察 <code>Runloop</code> 状态，也就不会自动去执行对应的 <code>autorelease</code> 的方法。根据引用计数来看的话，<code>autorelease</code> 方法和 <code>AutoreleasePool</code> 在一起才能发生作用，而目前又没有 <code>AutoreleasePool</code>，所以那是咋回事？</p>
+<p>事实上即使没有 <code>Runloop</code>，线程和 <code>AutoreleasePool</code> 也能直接发生关系。向某个对象发送 <code>autorelease</code> 消息后，会自动创建 <code>AutoreleasePoolPage</code>。<code>autorelease</code> 消息的调用栈可以参考上面的说明。最终 <code>TLS</code>(线程本地存储)会存储 <code>AutoreleasePoolPage</code> 对象。大致代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AutoreleasePoolPage *page = new AutoreleasePoolPage(nil);</span><br><span class="line">tls_set_direct(key, (void *)page);</span><br></pre></td></tr></table></figure>
+<p>这里具体实现比较复杂，而且根据是这种情况并不适用于主线程。可以看 <a href="https://stackoverflow.com/questions/24952549/does-nsthread-create-autoreleasepool-automatically-now" target="_blank" rel="noopener">StackOverflow</a> 的相关回答。这里不具体贴了。</p>
+<p>我个人觉得为了程序可读性还有稳定性，还是加上 <code>@autoreleasepool</code> 更妥。说稳定性是因为不能过度依赖于 <code>runtime</code> 的底层机制，万一 <code>runtime</code> 底层机制后续有变化可能会造成程序的异常。</p>
+<h2 id="什么时候需要我们手动创建-AutoreleasePool"><a href="#什么时候需要我们手动创建-AutoreleasePool" class="headerlink" title="什么时候需要我们手动创建 AutoreleasePool?"></a>什么时候需要我们手动创建 AutoreleasePool?</h2><ol>
+<li>如果工程只是 Foundation-Only(命令行那种),而不是 Cocoa application。那需要手动创建自动释放池。</li>
+<li>如果程序存活时间长，而且可能生成大量临时对象（比如循环里创建了一堆）那应该在合适地方（比如循环里）手动释放池，降低内存峰值（不用担心嵌套使用 <code>AutoreleasePool</code> 的问题）</li>
+<li>你创建了一个新线程，需要创建自动释放池。这个跟我们上面一小节说的是略微冲突，但是在上面已经说过了，添加 <code>AutoreleasePool</code> 是最佳实践。</li>
+</ol>
+<h3 id="参考地址"><a href="#参考地址" class="headerlink" title="参考地址"></a>参考地址</h3><p><a href="http://blog.sunnyxx.com/2014/10/15/behind-autorelease/" target="_blank" rel="noopener">黑幕背后的Autorelease</a><br><a href="https://draveness.me/autoreleasepool" target="_blank" rel="noopener">自动释放池的前世今生 —- 深入解析 autoreleasepool</a><br><a href="https://blog.ibireme.com/2015/05/18/runloop/" target="_blank" rel="noopener">深入理解RunLoop</a><br><a href="https://www.jianshu.com/p/5559bc15490d" target="_blank" rel="noopener">iOS中autorelease的那些事儿</a><br><a href="https://developer.apple.com/library/content/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226-CH1-SW8" target="_blank" rel="noopener">Transitioning to ARC Release Notes</a><br><a href="https://developer.apple.com/documentation/foundation/nsautoreleasepool#//apple_ref/occ/cl/NSAutoreleasePool" target="_blank" rel="noopener">NSAutoreleasePool</a><br><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmAutoreleasePools.html" target="_blank" rel="noopener">Using Autorelease Pool Blocks</a><br><a href="http://www.samirchen.com/ios-arc/" target="_blank" rel="noopener">iOS ARC 内存管理要点</a><br><a href="https://www.jianshu.com/p/f87f40592023" target="_blank" rel="noopener">各个线程 Autorelease 对象的内存管理</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/11/属性自动合成/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FanFrank">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FanFrank's Site">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/11/属性自动合成/" itemprop="url">属性自动合成</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T13:12:45+08:00">2018-01-11</time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/11/属性自动合成/" class="leancloud_visitors" data-flag-title="属性自动合成">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 <code>@dynamic</code> 或者开发者没有自定制它的 <code>getter</code> 或者 <code>setter</code> 方法实现。那 <code>Clang</code> 会自动为你合成 <code>getter</code> 和 <code>setter</code> 方法的实现同时生成对应的成员变量，检查 <code>Clang</code> 编译器是否支持自动合成使用<code>__has_feature(objc_default_synthesize_properties)</code> 这个条件判断。举例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#if __has_feature(objc_default_synthesize_properties)</span><br><span class="line">    //support autosynthesis</span><br><span class="line">#else</span><br><span class="line">    //not support</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
+<p>当编译器不能自动为你合成属性的时候，需要开发者手动进行。其实也可以换个说法，什么时候需要开发者手动 <code>@synthesize</code>。</p>
+<p>举个例子，开发中偶尔会遇到这种报错的情况：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@property (nonatomic,strong) NSString *name;</span><br><span class="line">.....</span><br><span class="line">@implementation</span><br><span class="line">- (void)setName:(NSString *)name &#123;</span><br><span class="line">    _name = name; #编译错误:Use of undeclared identifier &apos;_name&apos;; did you mean &apos;name&apos;?</span><br><span class="line">&#125;</span><br><span class="line">-  (NSString *)name &#123;</span><br><span class="line">    return @&quot;&quot;;</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>这个时候需要我们手动的添加一行代码 <code>@synthesize name = _name;</code> 编译错误就会消失。或者你把编译错误的那行去掉，然后使用命令 <code>clang -rewrite-objc main.m</code> 编译原文件，发现生成的对象结构体中并没有 <code>name</code> 对应的成员变量。</p>
+<p>接下来就是总结什么场景下需要我们手动添加 <code>@synthesize</code>。</p>
+<ol>
+<li>就是我们上面 <code>demo</code> 展示的这种可读写的属性，但是开发者自定义了 <code>getter</code> 和 <code>setter</code> 方法，注意必须是同时复写，如果只复写 <code>setter</code> 或者 <code>getter</code> 的话是不会出现问题的。这也是 <code>clang</code> 编译器不支持的自动合成的场景。</li>
+<li>只读属性，开发者自定义了 <code>getter</code> 方法。</li>
+<li><code>@dynamic</code> 修饰的属性，<code>@dynamic</code> 本质是告诉编译器 <code>setter</code> 与 <code>getter</code> 方法由开发者自己定义，不自动合成。</li>
+<li>在协议 <code>@protocol</code> 中声明的属性。</li>
+<li>在类别 <code>@category</code> 中声明的属性。这是因为类别不支持自动添加成员变量，需要手动进行引用关联。</li>
+<li>如果你复写了父类的属性，你也需要显式地添加 <code>@synthesize</code></li>
+<li>如果你想手动修改成员变量名的话，可以使用 <code>@synthesize</code> 修改，比如默认成员变量名是 <code>_name</code> 使用 <code>@synthesize name = yname;</code> 修改成员变量名为 <code>yname</code>，但是不建议这么做。</li>
+</ol>
+<p>#参考地址#<br><a href="https://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly" target="_blank" rel="noopener">When should I use @synthesize explicitly?</a><br><a href="http://clang.llvm.org/docs/LanguageExtensions.html#objective-c-autosynthesis-of-properties" target="_blank" rel="noopener">Objective-C Autosynthesis of Properties</a><br><a href="https://www.jianshu.com/p/beefa2da05b5" target="_blank" rel="noopener">@synthesize 和 @dynamic 的作用</a> </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/09/属性-attribute-总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FanFrank">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FanFrank's Site">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/09/属性-attribute-总结/" itemprop="url">属性 attribute 总结</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-09T21:59:57+08:00">2018-01-09</time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/09/属性-attribute-总结/" class="leancloud_visitors" data-flag-title="属性 attribute 总结">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><code>@property</code> 和 <code>attribute</code> 的中文翻译都是属性，所以本文就只用英文做区分了。<code>property</code> 的不同 <code>attribute</code> 大致包含下面这些</p>
+<ol>
+<li>strong               //default</li>
+<li>weak</li>
+<li>copy</li>
+<li>assign               //default</li>
+<li>unsafe_unretained</li>
+<li>atomic &amp; nonatomic   //default atomic </li>
+<li>readonly &amp; readwrite //default readwrite </li>
+</ol>
+<p>接下来依次说一下这些 <code>attribute</code> 的用处，使用方法还有使用时的可能注意事项</p>
+<h2 id="strong"><a href="#strong" class="headerlink" title="strong"></a>strong</h2><p><code>strong</code> 是 <code>ARC</code> 引入的方便内存管理的一种 <code>attribute</code>，跟 <code>MRC</code> 属性中的<code>retain</code> 效果基本是一样的。区别在于编译器遇到 <code>strong</code> 修饰的变量的时候会自动为其在合适的地方插入一条 <code>release</code> 语句。相同的地方就是为了强引用属性。强引用的意思就是当前对象持有自己的属性对象，如果当前对象不释放的话这个属性也不会被释放，而当对象释放的时候，<code>ARC</code> 也会自动为我们处理属性的释放，不需要开发者关心。<code>strong</code> 是我们最常用的一个 <code>attribute</code>。</p>
+<p>几个说明：</p>
+<ol>
+<li><code>strong attribute</code> 和变量前的修饰符 <code>__strong</code> 在 <code>ARC</code> 里的作用是一样的。只不过一个修饰属性一个修饰变量而已。参考 <a href="http://clang.llvm.org/docs/AutomaticReferenceCounting.html#property-declarations" target="_blank" rel="noopener">Property declarations</a></li>
+<li><p><code>strong</code> 不能用来修饰非对象。否则编译器会报错 </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Property with retain(or strong) attribute must be object type</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>一般如果某个属性前面不需要显式地写出 <code>strong</code> 编译器会自动认为这是 <code>strong</code> 类型的属性。</p>
+</li>
+<li><p><code>strong</code> 修饰符会自动处理以下两种 case,而引用计数不会出现异常。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;// 自己生成并持有对象</span><br><span class="line">    id __strong obj = [[NSObject alloc] init];</span><br><span class="line">&#125;</span><br><span class="line">&#123; // 非自己生成并持有对象.</span><br><span class="line">    id __strong obj = [NSMutableArray array];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>objc_storeStrong</code> 方法的说明，当向一个 <code>__strong</code> 修饰符修饰的对象赋值的时候跟执行下面代码是一样的效果。说白了就是执行了 <code>objc_storeStrong</code> 的方法。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//Precondition: object is a valid pointer to a __strong object which </span><br><span class="line">//is adequately aligned for a pointer. value is null or a pointer to a valid object.</span><br><span class="line">void objc_storeStrong(id *object, id value) &#123;</span><br><span class="line">  id oldValue = *object;</span><br><span class="line">  value = [value retain];</span><br><span class="line">  *object = value;</span><br><span class="line">  [oldValue release];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 值得说明的是 <code>FRObject *obj = [FRObject frobj];</code> 和 <code>FRObject *obj = temp;</code> 这两句代码编译器的处理是不一样的。第二句会执行如上 <code>objc_storeStrong</code> 的方法，但是第一句不会。我个人理解原因是 <code>obj</code> 初始化的时候并没有 <code>oldValue</code>，所以没有必要这么做。</p>
+</li>
+</ol>
+<h2 id="weak"><a href="#weak" class="headerlink" title="weak"></a>weak</h2><p><code>weak</code> 也是 <code>ARC</code> 引入的方便内存管理的一种 <code>attribute</code>，跟 <code>assign</code> 效果基本是一样的。区别在于在对象被释放的时候，<code>weak</code> 机制会自动将对象置为 nil,保证后续访问这个对象不会因为野指针闪退。</p>
+<p>真正引入 <code>weak</code> 的原因是 <code>weak</code> 能解决引起内存泄露的循环引用问题。</p>
+<p>几个说明：</p>
+<ol>
+<li><code>weak</code> 和 <code>strong</code> 一样只能用来修饰对象。</li>
+<li><code>weak attribute</code> 和变量前的修饰符 <code>__weak</code> 在 <code>ARC</code> 里的作用是一样的。</li>
+</ol>
+<h2 id="copy"><a href="#copy" class="headerlink" title="copy"></a>copy</h2><p><code>copy</code> 要求它修饰的属性必须实现 <code>NSCopy</code> 协议。本质上，当 <code>copy</code> 修饰的属性被赋值的时候，新值会收到一个 <code>copyWithZone</code> 方法，旧的值会被 release。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//clang 编译后的源码</span><br><span class="line"> static void _I_Fan_setName_(Fan * self, SEL _cmd, NSString *name) &#123; </span><br><span class="line"> objc_setProperty (self, _cmd, __OFFSETOFIVAR__(struct Fan, _name), (id)name, 1, 1); </span><br><span class="line"> &#125;</span><br><span class="line"> //runtime 里的对应方法</span><br><span class="line"> void objc_setProperty(id self, SEL _cmd, ptrdiff_t offset, id newValue, BOOL atomic, signed char shouldCopy)</span><br><span class="line"> //reallySetProperty 有对应 copy 属性的具体实现.</span><br></pre></td></tr></table></figure>
+<p><code>copy</code> 的使用场景通常是你希望属性在赋值后一直保持值不变，而不是跟着它指向的对象一直变。讨论比较多的是 <code>NSString</code> 是应该用 <code>copy</code> 还是用 <code>strong</code> 去修饰</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@property (atomic) NSString *name;</span><br><span class="line"></span><br><span class="line">NSMutableString *nameString = [NSMutableString stringWithString:@&quot;John&quot;];</span><br><span class="line">Fan *fan = [[Fan alloc] init];</span><br><span class="line">fan.name = nameString;</span><br><span class="line">NSLog(@&quot;fan.name = %@ %p&quot;,fan.name,fan.name);</span><br><span class="line">[nameString appendString:@&quot;ny&quot;];</span><br><span class="line">NSLog(@&quot;fan.name = %@ %p&quot;,fan.name,fan.name);</span><br><span class="line">//输出结果如下</span><br><span class="line">2018-01-11 20:35:18.763988+0800 TTTTT[71790:3384299] fan.name = John 0x10051e9c0</span><br><span class="line">2018-01-11 20:35:18.764449+0800 TTTTT[71790:3384299] fan.name = Johnny 0x10051e9c0</span><br></pre></td></tr></table></figure>
+<p>可以看到 <code>fan.name</code> 在没有显式修改的时候被改掉了，这种情况出现在 <code>NSString</code> 指针子类 <code>NSMutableString</code> 的情况下，而 <code>NSMutablString</code> 的修改不会对本身地址产生影响。使用 <code>copy</code> 可以避免。个人觉得使用 <code>copy</code> 还是 <code>strong</code> 还是根据实际情况，如果出了问题知道为什么就好了。</p>
+<h2 id="assign"><a href="#assign" class="headerlink" title="assign"></a>assign</h2><p>值得注意的是 <code>MRC</code> 时代和 <code>ARC</code> 时代的 <code>assign</code> 使用多少有点区别的。<code>MRC</code> 的 <code>assign</code> 是可以修饰对象还有普通基本类型，因为你根本也没得选。但是 <code>ARC</code> 下虽然 <code>assgin</code> 也都可以修饰基本类型和对象，但是通常修饰对象的话不会用 <code>assign</code> ，因为缺少了 <code>weak</code> 修饰变量被释放时候置为 <code>nil</code> 的特性，很有可能出现内存问题。所以我们现在用 <code>assign</code> 修饰基本类型就好了，需要弱引用的时候用 <code>weak</code> 用来修饰对象。规则也比较明确。</p>
+<h2 id="unsafe-unretained"><a href="#unsafe-unretained" class="headerlink" title="unsafe_unretained"></a>unsafe_unretained</h2><p><code>unsafe_unretained</code> 其实就是阉割版本的 <code>weak</code> 实现，它缺少正是对象释放时候置为 <code>nil</code> 的特性。但是 <code>unsafe_unretained</code> 还能修饰基本数据类型，<code>weak</code> 不行。</p>
+<p>看起来，我们使用 weak 就好了为啥要用 <code>unsafe_unretained</code> 这个属性呢。答案是因为 <code>__weak</code> 只支持 <code>iOS 5.0</code> 和 <code>OS X Mountain Lion</code> 作为部署版本，如果是想要兼容更低的支持 ARC 的版本，比如你想部署回 <code>iOS 4.0</code> 和 <code>OS X Snow Leopark</code> 就不得不使用 <code>unsafe_unretained</code>。</p>
+<p>还有一种说法是 <code>weak</code> 底层实现比较繁琐消耗性能，我认为与 <code>weak</code> 带来的好处相比，这点消耗可以忽略。</p>
+<h2 id="atomic-amp-nonatomic"><a href="#atomic-amp-nonatomic" class="headerlink" title="atomic &amp; nonatomic"></a>atomic &amp; nonatomic</h2><p><code>atomic</code> 和 <code>nonatomic</code> 区别在于向属性对应成员变量赋值的时候是否为原子写入，即能不能够保证安全写入，从这一点上 <code>atomic</code> 确实是安全的。但是 <code>atomic</code> 并非是线程安全的，因为 <code>atomic</code> 控制的粒度太细了。</p>
+<p>举个例子，A 线程向属性写入一个值，A 线程后续再次读这个值之前，可能 B 线程也向同样的属性里写入另外一个值，这样 A 线程读取的时候并非读到的是自己刚写入的值而是一个预期之外的值。</p>
+<p>从这一点上看 <code>atomic</code> 似乎用处不是很大，同时 <code>atomic</code> 底层是用锁实现的，频繁写入会影响性能。个人认为最好的实践是，使用 <code>nonatomic</code> 然后自己去处理线程相关的东西。</p>
+<p>几个说明：</p>
+<ol>
+<li><code>atomic</code> 是默认属性。比如 <code>@property NSString *name;</code> 这种属性默认就是 <code>atomic</code> 修饰的。</li>
+<li><code>atomic</code> 的底层实现里，赋值和读取值都有锁的保护，而且使用的都是一个锁。</li>
+<li><p><code>atomic</code> 不允许开发者自己复写其 <code>getter</code> 方法，强制复写会得到一个警告。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#Writable atomic property &apos;name&apos; cannot pair a synthesized setter with a user defined getter</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="readonly-amp-readwrite"><a href="#readonly-amp-readwrite" class="headerlink" title="readonly &amp; readwrite"></a>readonly &amp; readwrite</h2><p><code>readonly</code> 和 <code>readwrite</code> 其实就是编译器级别帮你做了只读和读写的处理。<br><code>readonly</code> 是告诉编译器不用生成 <code>setter</code> 方法，同时如果你对这个 <code>readonly</code> 属性赋值的时候编译器会报错  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#Assignment to readonly property</span><br></pre></td></tr></table></figure>
+<p><code>readwrite</code> 是默认的属性，它会告诉编译器自动生成 <code>setter</code> 和 <code>getter</code> 方法。开发者可以随意复写这两个方法来满足自己的时机情况。</p>
+<h2 id="补充关于自动合成属性的声明。"><a href="#补充关于自动合成属性的声明。" class="headerlink" title="补充关于自动合成属性的声明。"></a>补充关于自动合成属性的声明。</h2><p><code>Clang</code> 提供了对已声明属性自动合成的支持。这个功能提供了没有被 <code>@dynamic</code> 修饰的属性的 <code>getter</code> 和 <code>setter</code> 方法，而不用用户手动添加。</p>
+<p>Clang provides support for autosynthesis of declared properties. Using this feature, clang provides default synthesis of those properties not declared @dynamic and not having user provided backing getter and setter methods. __has_feature(objc_default_synthesize_properties) checks for availability of this feature in version of clang being used.</p>
+<h2 id="一些面试时常遇到的-QA"><a href="#一些面试时常遇到的-QA" class="headerlink" title="一些面试时常遇到的 QA"></a>一些面试时常遇到的 QA</h2><p><strong>Q: assign, weak 和 unsafe_unretained 的区别?</strong><br>A: assign 和 unsafe_unretained 是等价的。weak 和它们区别是在对象释放的时候增加了将其置为 <code>nil</code> 的功能。</p>
+<p><strong>Q: atomic 是不是线程安全的？</strong><br>A: 参考上面说明.</p>
+<p><strong>Q: <code>@property NSString *name;</code> 这个属性的 <code>attribute</code> 是?</strong><br>A: strong,atomic,readwrite. </p>
+<p>参考<br><a href="https://developer.apple.com/library/content/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html" target="_blank" rel="noopener">Transitioning to ARC Release Notes</a><br><a href="http://clang.llvm.org/docs/AutomaticReferenceCounting.html" target="_blank" rel="noopener">Objective-C Automatic Reference Counting (ARC)</a><br><a href="http://www.vanbein.com/posts/ios基础/2015/12/08/propertyshu-xing-xiu-shi-fu-zong-jie/" target="_blank" rel="noopener">property属性修饰符总结</a><br><a href="http://www.ios-blog.co.uk/tutorials/objective-c/objective-c-property-attribute-reference-guide/" target="_blank" rel="noopener">Objective-C: Property Attribute Reference Guide</a><br><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/EncapsulatingData/EncapsulatingData.html#//apple_ref/doc/uid/TP40011210-CH5-SW6" target="_blank" rel="noopener">Encapsulating Data</a><br><a href="http://rdcworld-iphone.blogspot.in/2012/12/variable-property-attributes-or.html" target="_blank" rel="noopener">Variable property attributes or Modifiers in iOS</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/06/属性和运行时/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FanFrank">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FanFrank's Site">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/06/属性和运行时/" itemprop="url">属性和运行时</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-06T17:30:03+08:00">2018-01-06</time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/06/属性和运行时/" class="leancloud_visitors" data-flag-title="属性和运行时">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><code>@property</code> 的本质是什么?</li>
+<li><code>@property</code> 和运行时有什么关系?</li>
+<li><code>@property</code> 一个 demo</li>
+</ol>
+<h1 id="property-的本质是什么"><a href="#property-的本质是什么" class="headerlink" title="property 的本质是什么"></a><code>property</code> 的本质是什么</h1><p><code>@property</code> 的本质就是成员变量加 <code>getter</code> 和 <code>setter</code> 方法。<code>getter</code> 和 <code>setter</code> 方法是编译器自动为我们生成的。我们也可以尝试去复写 <code>getter</code> 和 <code>setter</code> 方法，在设置成员变量前后增加一些我们想要的业务逻辑。</p>
+<p><code>@property</code> 有不同的 <code>attribute</code> : <code>readonly</code>,<code>atomic</code>,<code>nonatomic</code> 等等。编译器会根据不同的 <code>attribute</code> 生成不同的 <code>getter</code> 和 <code>setter</code> 方法</p>
+<h1 id="property-和运行时有什么关系"><a href="#property-和运行时有什么关系" class="headerlink" title="property 和运行时有什么关系?"></a><code>property</code> 和运行时有什么关系?</h1><p>来看下运行时系统对 <code>property</code> 相关类型的定义</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">template &lt;typename Element, typename List, uint32_t FlagMask&gt;</span><br><span class="line">struct property_list_t : entsize_list_tt&lt;property_t, property_list_t, 0&gt; &#123;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">typedef struct property_t *objc_property_t;</span><br><span class="line">struct property_t &#123;</span><br><span class="line">    const char *name;</span><br><span class="line">    const char *attributes;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">/// Defines a property attribute</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    const char *name;           /**&lt; The name of the attribute */</span><br><span class="line">    const char *value;          /**&lt; The value of the attribute (usually empty) */</span><br><span class="line">&#125; objc_property_attribute_t;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>entsize_list_tt</code> 是通过 <code>C++</code> 的容器类，提供了容器类的基本方法，通过这些基本方法可以管理数据并以遍历的方式获取容器内的数据。<code>property_list_t</code> 是管理 <code>property_t</code> 的一个属性类型。</p>
+</blockquote>
+<p>了解了基本数据类型之后，我们来讨论几个问题</p>
+<h2 id="类是怎么获取到-property-的"><a href="#类是怎么获取到-property-的" class="headerlink" title="类是怎么获取到 @property 的?"></a>类是怎么获取到 <code>@property</code> 的?</h2><p>看源码及注释</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">objc_property_t class_getProperty(Class cls, const char *name)</span><br><span class="line">&#123;</span><br><span class="line">    .......</span><br><span class="line">    //依次遍历父类</span><br><span class="line">    for ( ; cls; cls = cls-&gt;superclass) &#123;</span><br><span class="line">        //遍历当前类的属性列表</span><br><span class="line">        for (auto&amp; prop : cls-&gt;data()-&gt;properties) &#123;</span><br><span class="line">            //比较字符串如果相等就返回当前的 property</span><br><span class="line">            if (0 == strcmp(name, prop.name)) &#123;  </span><br><span class="line">                return (objc_property_t)&amp;prop;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="类是怎么增加-property-的"><a href="#类是怎么增加-property-的" class="headerlink" title="类是怎么增加 property 的?"></a>类是怎么增加 <code>property</code> 的?</h2><p>看源码及注释</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">static bool _class_addProperty(Class cls, const char *name, </span><br><span class="line">                   const objc_property_attribute_t *attrs, unsigned int count, </span><br><span class="line">                   bool replace)</span><br><span class="line">&#123;</span><br><span class="line">    if (!cls) return NO;</span><br><span class="line">    if (!name) return NO;</span><br><span class="line">    //先从当前类获取指定名称的 property，如果有而且 caller 不想替换则直接返回</span><br><span class="line">    property_t *prop = class_getProperty(cls, name);</span><br><span class="line">    if (prop  &amp;&amp;  !replace) &#123;</span><br><span class="line">        // already exists, refuse to replace</span><br><span class="line">        return NO;</span><br><span class="line">    &#125; </span><br><span class="line">    //替换当前 property 流程，其实就是把 property 相关的 attributes 进行替换。</span><br><span class="line">    else if (prop) &#123;</span><br><span class="line">        // replace existing</span><br><span class="line">        rwlock_writer_t lock(runtimeLock);</span><br><span class="line">        try_free(prop-&gt;attributes);</span><br><span class="line">        //参数 count 是 attrs 的数量。</span><br><span class="line">        prop-&gt;attributes = copyPropertyAttributeString(attrs, count);</span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        //为新的 property 分配空空间。值得注意的是这里并不是直接分配的 property 而是通过 property_list 进行操作的。</span><br><span class="line">        property_list_t *proplist = (property_list_t *)malloc(sizeof(*proplist));</span><br><span class="line">        proplist-&gt;count = 1;</span><br><span class="line">        proplist-&gt;entsizeAndFlags = sizeof(proplist-&gt;first);</span><br><span class="line">        proplist-&gt;first.name = strdupIfMutable(name);</span><br><span class="line">        proplist-&gt;first.attributes = copyPropertyAttributeString(attrs, count);</span><br><span class="line">        //cls-&gt;data() 拿到 class_rw_t 结构体，结构体里的 properties 是 property_array_t 类型，将新的 property 加入到 property 数组中。</span><br><span class="line">        cls-&gt;data()-&gt;properties.attachLists(&amp;proplist, 1);</span><br><span class="line">        </span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="property-和成员变量是怎么对应起来的？"><a href="#property-和成员变量是怎么对应起来的？" class="headerlink" title="property 和成员变量是怎么对应起来的？"></a><code>property</code> 和成员变量是怎么对应起来的？</h2><p>其实是在编译这一步就做好了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@interface Fan : NSObject</span><br><span class="line">@property (nonatomic,strong) NSString *name;</span><br><span class="line">@end</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<p>编译 clang -rewrite-objc main.m  之后结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct objc_object Fan;</span><br><span class="line"></span><br><span class="line">extern &quot;C&quot; unsigned long OBJC_IVAR_$_Fan$_name;</span><br><span class="line">struct Fan_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	NSString *_name;</span><br><span class="line">&#125;;</span><br><span class="line">// @property (atomic,strong) NSString *name;</span><br><span class="line">/* @end */</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>可以看到 <code>name</code> 属性变成了成员变量 <code>_name</code>。</p>
+<h2 id="property-一个-demo"><a href="#property-一个-demo" class="headerlink" title="property 一个 demo"></a><code>property</code> 一个 demo</h2><p>我们之前猜测不同 <code>property</code> 的 <code>attribute</code> 会对编译器造成影响，即生成出来的 <code>setter</code> 和 <code>getter</code> 方法可能不同，比如 <code>atomic</code> 的 <code>setter</code> 方法可能会有锁的实现，于是我补充了上面源码的 <code>getter</code> 和 <code>setter</code> 实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">static NSString * _I_Fan_name(Fan * self, SEL _cmd) &#123; return (*(NSString **)((char *)self + OBJC_IVAR_$_Fan$_name)); &#125;</span><br><span class="line">static void _I_Fan_setName_(Fan * self, SEL _cmd, NSString *name) &#123; (*(NSString **)((char *)self + OBJC_IVAR_$_Fan$_name)) = name; &#125;</span><br></pre></td></tr></table></figure>
+<p>发现 setter 并没有什么特别的地方… </p>
+<p>难道我的验证有问题吗？感觉不应该。我尝试在 demo 中给 <code>name</code> 属性赋值，并打了个符号断点 <code>objc_setProperty_atomic</code> 发现这个方法确实走了，所以 <code>clang</code> 出来的结果应该是有问题的。怎么生成更准确的编译结果我也不清楚。。 </p>
+<p><img src="/media/Jietu20180106-185957.png" alt="Jietu20180106-185957"></p>
+<p>你也许会问 <code>objc_setProperty_atomic</code> 这个是干什么用的，翻源码到 <code>objc-accessors.mm</code> 这个文件看，可以看到不同的修饰符走了不同的设置属性的方法比如 <code>objc_setProperty_nonatomic</code>，<code>objc_setProperty_atomic</code>，<code>objc_setProperty_atomic_copy</code> 最终他们都调用了 <code>reallySetProperty</code> 这个方法接收了众多参数，根据不同的参数，走了不同的执行流。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">static inline void reallySetProperty(id self, SEL _cmd, id newValue, ptrdiff_t offset, bool atomic, bool copy, bool mutableCopy)</span><br><span class="line">&#123;</span><br><span class="line">    if (offset == 0) &#123;</span><br><span class="line">        object_setClass(self, newValue);</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    id oldValue;</span><br><span class="line">    //这里的 offset 其实就是上一步编译时候确定的。</span><br><span class="line">    id *slot = (id*) ((char*)self + offset);</span><br><span class="line">    if (copy) &#123;</span><br><span class="line">        newValue = [newValue copyWithZone:nil];</span><br><span class="line">    &#125; else if (mutableCopy) &#123;</span><br><span class="line">        newValue = [newValue mutableCopyWithZone:nil];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (*slot == newValue) return;</span><br><span class="line">        newValue = objc_retain(newValue);</span><br><span class="line">    &#125;</span><br><span class="line">    if (!atomic) &#123;</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        //在这里看到 atomic 确实是使用自旋锁来对赋值进行了保护。</span><br><span class="line">        spinlock_t&amp; slotlock = PropertyLocks[slot];</span><br><span class="line">        slotlock.lock();</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;        </span><br><span class="line">        slotlock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    objc_release(oldValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，属性机制的实现不仅靠编译时，运行时也起了很大的作用。</p>
+<p>一个思考，能否在运行时候动态添加属性呢？</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -935,7 +1673,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
