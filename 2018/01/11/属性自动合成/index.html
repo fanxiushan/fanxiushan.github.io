@@ -75,17 +75,17 @@
 
 
 
-<meta name="description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
+<meta name="description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
 <meta property="og:type" content="article">
-<meta property="og:title" content="NSError 最佳实践">
-<meta property="og:url" content="http://yoursite.com/2017/12/29/NSError-最佳实践/index.html">
+<meta property="og:title" content="属性自动合成">
+<meta property="og:url" content="http://yoursite.com/2018/01/11/属性自动合成/index.html">
 <meta property="og:site_name" content="FanFrank&#39;s Site">
-<meta property="og:description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
+<meta property="og:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-29T14:21:43.000Z">
+<meta property="og:updated_time" content="2018-01-16T15:08:54.234Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="NSError 最佳实践">
-<meta name="twitter:description" content="NSError 的使用访问系统的一些资源的时候，不可避免的会遇到一些错误，我们需要告诉用户或者提醒我们自己遇到什么问题了，方便定位解决。比如移除指定路径文件或者目录的时候，可能文件不存在或者路径有问题等等，我们需要知道究竟为什么不能成功移除，这时候错误信息就很重要了，看下系统是怎么设计这类 API 的。- (BOOL)removeItemAtPath:(NSString *)path error:">
+<meta name="twitter:title" content="属性自动合成">
+<meta name="twitter:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
 
 
 
@@ -117,7 +117,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/12/29/NSError-最佳实践/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/11/属性自动合成/"/>
 
 
 
@@ -392,8 +392,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/09/属性-attribute-总结/" rel="next" title="属性 attribute 总结">
-                <i class="fa fa-chevron-left"></i> 属性 attribute 总结
+              <a href="/2018/01/09/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
               </a>
             
           </div>
