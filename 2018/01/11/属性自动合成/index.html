@@ -82,10 +82,12 @@
 <meta property="og:site_name" content="FanFrank&#39;s Site">
 <meta property="og:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-16T15:08:54.234Z">
+<meta property="og:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
+<meta property="og:updated_time" content="2018-03-23T13:44:48.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="属性自动合成">
 <meta name="twitter:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta name="twitter:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
 
 
 
@@ -367,6 +369,18 @@
 <li>如果你复写了父类的属性，你也需要显式地添加 <code>@synthesize</code></li>
 <li>如果你想手动修改成员变量名的话，可以使用 <code>@synthesize</code> 修改，比如默认成员变量名是 <code>_name</code> 使用 <code>@synthesize name = yname;</code> 修改成员变量名为 <code>yname</code>，但是不建议这么做。</li>
 </ol>
+<p>2018-03-23 </p>
+<p>补充一些关于第 6 点的说明。</p>
+<p>如果父类自动生成属性成员变量和 getter, setter 方法。子类对父类的属性重新进行了 <code>@synthesize</code> 那将会生成新的实例变量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">@interface Fan : NSObject</span><br><span class="line">@property (nonatomic, strong) NSString *name;</span><br><span class="line">@end</span><br><span class="line">//父类 Fan 并没有 @synthesize 而且没有复写 getter 和 setter 方法.</span><br><span class="line">......</span><br><span class="line">@interface FanSub : Fan</span><br><span class="line">....</span><br><span class="line">@implementation FanSub</span><br><span class="line">@synthesize name = fname;</span><br><span class="line">- (void)setName:(NSString *)name &#123;</span><br><span class="line">    fname = name;</span><br><span class="line">&#125;</span><br><span class="line">- (NSString *)name &#123;</span><br><span class="line">    return fname;</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>注意的是此时子类中的 <code>name</code> 属性对应的实例变量其实是 <code>fname</code>. 即它自己生成的实例变量，而不是父类的 <code>_name</code> 了。可以通过查看编译后的选项来验证 <code>clang -rewrite-objc main.m</code>。结合编译后对应的结构体看一下，确实是成员变量发生了变化。<strong>所以这个时候要注意，不能把子类的属性成员变量和父类的成员变量混为一谈。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//编译后的结构体.</span><br><span class="line">struct Fan_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	NSString *_name;</span><br><span class="line">&#125;;</span><br><span class="line">struct FanSub_IMPL &#123;</span><br><span class="line">	struct Fan_IMPL Fan_IVARS;</span><br><span class="line">	NSString *fname;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>一点总结：<br><img src="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg" alt=""></p>
+<p>所以子类合成和使用属性对应自动变量的两个原则：</p>
+<ol>
+<li>不允许合成和父类名字一样自动变量</li>
+<li>如果在子类中有用到父类属性对应的自动变量，则需要显式地在父类头文件的成员变量区域去进行自动变量的声明。</li>
+</ol>
 <p>#参考地址#<br><a href="https://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly" target="_blank" rel="noopener">When should I use @synthesize explicitly?</a><br><a href="http://clang.llvm.org/docs/LanguageExtensions.html#objective-c-autosynthesis-of-properties" target="_blank" rel="noopener">Objective-C Autosynthesis of Properties</a><br><a href="https://www.jianshu.com/p/beefa2da05b5" target="_blank" rel="noopener">@synthesize 和 @dynamic 的作用</a> </p>
 
       
@@ -392,8 +406,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/09/hello-world/" rel="next" title="Hello World">
-                <i class="fa fa-chevron-left"></i> Hello World
+              <a href="/2018/01/09/属性-attribute-总结/" rel="next" title="属性 attribute 总结">
+                <i class="fa fa-chevron-left"></i> 属性 attribute 总结
               </a>
             
           </div>
@@ -476,7 +490,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
