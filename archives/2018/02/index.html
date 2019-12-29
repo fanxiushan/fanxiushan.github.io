@@ -6,10 +6,10 @@
 
 
 <html class="theme-next pisces use-motion" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -20,8 +20,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -44,9 +44,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.0">
@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Hexo, NexT">
 
 
 
@@ -75,19 +75,20 @@
 
 
 
-<meta name="description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta name="description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="属性自动合成">
-<meta property="og:url" content="http://yoursite.com/2018/01/11/属性自动合成/index.html">
+<meta property="og:title" content="Objective-C 里的拷贝">
+<meta property="og:url" content="http://yoursite.com/2018/03/05/Objective-C-里的拷贝/index.html">
 <meta property="og:site_name" content="FanFrank&#39;s Site">
-<meta property="og:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta property="og:description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
-<meta property="og:updated_time" content="2018-03-23T13:44:48.000Z">
+<meta property="og:image" content="http://yoursite.com/media/Jietu20180305-184629.png">
+<meta property="og:image" content="http://yoursite.com/media/15203089948766.jpg">
+<meta property="og:updated_time" content="2019-12-29T14:00:30.803Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="属性自动合成">
-<meta name="twitter:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
-<meta name="twitter:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
+<meta name="twitter:title" content="Objective-C 里的拷贝">
+<meta name="twitter:description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
+<meta name="twitter:image" content="http://yoursite.com/media/Jietu20180305-184629.png">
 
 
 
@@ -119,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/11/属性自动合成/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/03/05/Objective-C-里的拷贝/">
 
 
 
@@ -162,7 +163,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">FanFrank's Site</span>
         <span class="logo-line-after"><i></i></span>
@@ -192,7 +193,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首页
           </a>
@@ -202,7 +203,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             归档
           </a>
@@ -215,7 +216,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             搜索
           </a>
@@ -236,9 +237,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -274,7 +273,7 @@
         
           
         
-        嗯..! 目前共计 10 篇日志。 继续努力。
+        嗯..! 目前共计 12 篇日志。 继续努力。
       </span>
 
       
@@ -307,9 +306,7 @@
       </h2>
 
       <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-02-28T17:01:17+08:00"
-              content="2018-02-28" >
+        <time class="post-time" itemprop="dateCreated" datetime="2018-02-28T17:01:17+08:00" content="2018-02-28">
           02-28
         </time>
       </div>
@@ -361,9 +358,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/avatar.png"
-                alt="FanFrank" />
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="FanFrank">
             
               <p class="site-author-name" itemprop="name">FanFrank</p>
               <p class="site-description motion-element" itemprop="description">iOS & macOS Develop</p>
@@ -376,7 +371,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -433,7 +428,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

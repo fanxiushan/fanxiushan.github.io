@@ -6,10 +6,10 @@
 
 
 <html class="theme-next pisces use-motion" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -20,8 +20,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -44,9 +44,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.0">
@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Hexo, NexT">
 
 
 
@@ -75,19 +75,20 @@
 
 
 
-<meta name="description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta name="description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="属性自动合成">
-<meta property="og:url" content="http://yoursite.com/2018/01/11/属性自动合成/index.html">
+<meta property="og:title" content="Objective-C 里的拷贝">
+<meta property="og:url" content="http://yoursite.com/2018/03/05/Objective-C-里的拷贝/index.html">
 <meta property="og:site_name" content="FanFrank&#39;s Site">
-<meta property="og:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta property="og:description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
-<meta property="og:updated_time" content="2018-03-23T13:44:48.000Z">
+<meta property="og:image" content="http://yoursite.com/media/Jietu20180305-184629.png">
+<meta property="og:image" content="http://yoursite.com/media/15203089948766.jpg">
+<meta property="og:updated_time" content="2019-12-29T14:00:30.803Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="属性自动合成">
-<meta name="twitter:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
-<meta name="twitter:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
+<meta name="twitter:title" content="Objective-C 里的拷贝">
+<meta name="twitter:description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
+<meta name="twitter:image" content="http://yoursite.com/media/Jietu20180305-184629.png">
 
 
 
@@ -119,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/11/属性自动合成/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/03/05/Objective-C-里的拷贝/">
 
 
 
@@ -162,7 +163,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">FanFrank's Site</span>
         <span class="logo-line-after"><i></i></span>
@@ -192,7 +193,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首页
           </a>
@@ -202,7 +203,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             归档
           </a>
@@ -215,7 +216,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             搜索
           </a>
@@ -236,9 +237,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -281,7 +280,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FanFrank">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="/images/avatar.png">
     </span>
 
@@ -382,7 +381,8 @@
 <p> 可以通过 Bonjour 提供的 API 注册服务，Bonjour 可以自动广播你的服务，任何查询你的服务的请求都会直接被转到正确的 IP 和端口。</p>
 <p> 每个服务和设备都应该只有一个名字，这个名字只在当前的网络环境下起作用。这个起名字的过程大概是这样的</p>
 <ol>
-<li>硬件厂商的设备通过发送带有自己名字（XYZ-LaserPrinter.local）的查询来看下是否当前网络中有一样的，如果有响应那就应该重新起个名字（XYZ-LaserPrinter-1.local 这个名字是在原来名字的基础上继续拼接了一个数字）如果没有则继续之前的操作。直到新的名字的查询没有响应。</li>
+<li><p>硬件厂商的设备通过发送带有自己名字（XYZ-LaserPrinter.local）的查询来看下是否当前网络中有一样的，如果有响应那就应该重新起个名字（XYZ-LaserPrinter-1.local 这个名字是在原来名字的基础上继续拼接了一个数字）如果没有则继续之前的操作。直到新的名字的查询没有响应。</p>
+</li>
 <li><p>软件服务是当注册的时候自己起一个名字，如果名字已经被使用了，则 Bonjour 协议会重新给它起一个。</p>
 <p>为了向系统表明 local host，macOS 上会在 local host 后面再加个点,比如 <code>Steve.local.</code>。 这部分命名规则比较复杂，这里不赘述了。</p>
 </li>
@@ -394,8 +394,10 @@
 <h2 id="Bonjour-实践"><a href="#Bonjour-实践" class="headerlink" title="Bonjour 实践"></a>Bonjour 实践</h2><p>macOS 系统提供了一个名为 <code>dns-sd</code> 的 Multicast DNS (mDNS) 和 DNS Service Discovery (DNS-SD) 测试工具。</p>
 <p>一个例子，我想查看当前网络下能提供打印的服务</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ dns-sd -B _printer</span><br><span class="line">Browsing for _printer._tcp</span><br><span class="line">DATE: ---Thu 28 Dec 2017---</span><br><span class="line">19:45:30.989  ...STARTING...</span><br><span class="line">Timestamp     A/R    Flags  if Domain               Service Type         Instance Name</span><br><span class="line">19:45:30.990  Add        3   5 local.               _printer._tcp.       Brother MFC-8510DN [30055c9332be] (2)</span><br><span class="line">19:45:30.990  Add        2   5 local.               _printer._tcp.       Brother MFC-8510DN [30055c92a583] (2)</span><br></pre></td></tr></table></figure>
+
 <p>我啥都不指定是默认会列出当前提供 http 的服务</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ dns-sd -B  </span><br><span class="line">Browsing for _http._tcp</span><br><span class="line">DATE: ---Thu 28 Dec 2017---</span><br><span class="line">19:45:49.802  ...STARTING...</span><br><span class="line">Timestamp     A/R    Flags  if Domain               Service Type         Instance Name</span><br><span class="line">19:45:49.803  Add        3   8 local.               _http._tcp.          webserver (5)</span><br><span class="line">19:45:49.804  Add        3   8 local.               _http._tcp.          bxxx</span><br></pre></td></tr></table></figure>
+
 <p>还有一个 Bonjour Browser 的软件(如图)来提供可视化的 Bonjour 服务浏览<br><img src="/media/Jietu20171228-195757.png" alt="Jietu20171228-195757"></p>
 <h2 id="为啥有的时候连不上-Bonjour"><a href="#为啥有的时候连不上-Bonjour" class="headerlink" title="为啥有的时候连不上 Bonjour?"></a>为啥有的时候连不上 Bonjour?</h2><ol>
 <li>确认路由器开启了组播模式，某些路由器（如思科）默认关闭了「组播模式」，故无法在此网络下搜索到设备.</li>
@@ -505,9 +507,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/avatar.png"
-                alt="FanFrank" />
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="FanFrank">
             
               <p class="site-author-name" itemprop="name">FanFrank</p>
               <p class="site-description motion-element" itemprop="description">iOS & macOS Develop</p>
@@ -520,7 +520,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -573,7 +573,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-Bonjour"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x4EC0;&#x4E48;&#x662F;-Bonjour" class="headerlink" title="&#x4EC0;&#x4E48;&#x662F; Bonjour"></a>&#x4EC0;&#x4E48;&#x662F; Bonjour</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-提供了哪些服务？"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Bonjour-&#x63D0;&#x4F9B;&#x4E86;&#x54EA;&#x4E9B;&#x670D;&#x52A1;&#xFF1F;" class="headerlink" title="Bonjour &#x63D0;&#x4F9B;&#x4E86;&#x54EA;&#x4E9B;&#x670D;&#x52A1;&#xFF1F;"></a>Bonjour &#x63D0;&#x4F9B;&#x4E86;&#x54EA;&#x4E9B;&#x670D;&#x52A1;&#xFF1F;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-的工作机制是什么样子的"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Bonjour-&#x7684;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x5B50;&#x7684;" class="headerlink" title="Bonjour &#x7684;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x5B50;&#x7684;?"></a>Bonjour &#x7684;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x5B50;&#x7684;?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-实践"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Bonjour-&#x5B9E;&#x8DF5;" class="headerlink" title="Bonjour &#x5B9E;&#x8DF5;"></a>Bonjour &#x5B9E;&#x8DF5;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为啥有的时候连不上-Bonjour"><span class="nav-number">5.</span> <span class="nav-text"><a href="#&#x4E3A;&#x5565;&#x6709;&#x7684;&#x65F6;&#x5019;&#x8FDE;&#x4E0D;&#x4E0A;-Bonjour" class="headerlink" title="&#x4E3A;&#x5565;&#x6709;&#x7684;&#x65F6;&#x5019;&#x8FDE;&#x4E0D;&#x4E0A; Bonjour?"></a>&#x4E3A;&#x5565;&#x6709;&#x7684;&#x65F6;&#x5019;&#x8FDE;&#x4E0D;&#x4E0A; Bonjour?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-Bonjour"><span class="nav-number">1.</span> <span class="nav-text">什么是 Bonjour</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-提供了哪些服务？"><span class="nav-number">2.</span> <span class="nav-text">Bonjour 提供了哪些服务？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-的工作机制是什么样子的"><span class="nav-number">3.</span> <span class="nav-text">Bonjour 的工作机制是什么样子的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bonjour-实践"><span class="nav-number">4.</span> <span class="nav-text">Bonjour 实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为啥有的时候连不上-Bonjour"><span class="nav-number">5.</span> <span class="nav-text">为啥有的时候连不上 Bonjour?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
@@ -593,7 +593,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

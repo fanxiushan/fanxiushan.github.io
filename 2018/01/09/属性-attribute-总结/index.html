@@ -6,10 +6,10 @@
 
 
 <html class="theme-next pisces use-motion" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -20,8 +20,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -44,9 +44,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=6.0.0" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.0">
@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Hexo, NexT">
 
 
 
@@ -75,19 +75,20 @@
 
 
 
-<meta name="description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta name="description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="属性自动合成">
-<meta property="og:url" content="http://yoursite.com/2018/01/11/属性自动合成/index.html">
+<meta property="og:title" content="Objective-C 里的拷贝">
+<meta property="og:url" content="http://yoursite.com/2018/03/05/Objective-C-里的拷贝/index.html">
 <meta property="og:site_name" content="FanFrank&#39;s Site">
-<meta property="og:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
+<meta property="og:description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
-<meta property="og:updated_time" content="2018-03-23T13:44:48.000Z">
+<meta property="og:image" content="http://yoursite.com/media/Jietu20180305-184629.png">
+<meta property="og:image" content="http://yoursite.com/media/15203089948766.jpg">
+<meta property="og:updated_time" content="2019-12-29T14:00:30.803Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="属性自动合成">
-<meta name="twitter:description" content="Clang 编译器提供了 OC 自动合成属性的功能。如果一个属性没有被声明为 @dynamic 或者开发者没有自定制它的 getter 或者 setter 方法实现。那 Clang 会自动为你合成 getter 和 setter 方法的实现同时生成对应的成员变量，检查 Clang 编译器是否支持自动合成使用__has_feature(objc_default_synthesize_properti">
-<meta name="twitter:image" content="http://p2ap0u22n.bkt.clouddn.com/15218123235013.jpg">
+<meta name="twitter:title" content="Objective-C 里的拷贝">
+<meta name="twitter:description" content="Objective-C 语言里的拷贝就是对象拷贝，即创建一个跟之前的实例对象一模一样的对象。一般来说数据模型类是需要支持拷贝的。Objective-C 里拷贝又分为浅拷贝（shallow-copy）和深拷贝（deep-copy）。 浅拷贝和深拷贝区别浅拷贝只是复制一下对象指针，但是拷贝前和拷贝后的对象指针均指向同一内存区域，只不过是对象的内存引用计数加一。深拷贝为拷贝前和拷贝后的对象指针指向不同的">
+<meta name="twitter:image" content="http://yoursite.com/media/Jietu20180305-184629.png">
 
 
 
@@ -119,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/11/属性自动合成/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/03/05/Objective-C-里的拷贝/">
 
 
 
@@ -162,7 +163,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">FanFrank's Site</span>
         <span class="logo-line-after"><i></i></span>
@@ -192,7 +193,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首页
           </a>
@@ -202,7 +203,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             归档
           </a>
@@ -215,7 +216,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             搜索
           </a>
@@ -236,9 +237,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -281,7 +280,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FanFrank">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="/images/avatar.png">
     </span>
 
@@ -367,7 +366,8 @@
 <h2 id="strong"><a href="#strong" class="headerlink" title="strong"></a>strong</h2><p><code>strong</code> 是 <code>ARC</code> 引入的方便内存管理的一种 <code>attribute</code>，跟 <code>MRC</code> 属性中的<code>retain</code> 效果基本是一样的。区别在于编译器遇到 <code>strong</code> 修饰的变量的时候会自动为其在合适的地方插入一条 <code>release</code> 语句。相同的地方就是为了强引用属性。强引用的意思就是当前对象持有自己的属性对象，如果当前对象不释放的话这个属性也不会被释放，而当对象释放的时候，<code>ARC</code> 也会自动为我们处理属性的释放，不需要开发者关心。<code>strong</code> 是我们最常用的一个 <code>attribute</code>。</p>
 <p>几个说明：</p>
 <ol>
-<li><code>strong attribute</code> 和变量前的修饰符 <code>__strong</code> 在 <code>ARC</code> 里的作用是一样的。只不过一个修饰属性一个修饰变量而已。参考 <a href="http://clang.llvm.org/docs/AutomaticReferenceCounting.html#property-declarations" target="_blank" rel="noopener">Property declarations</a></li>
+<li><p><code>strong attribute</code> 和变量前的修饰符 <code>__strong</code> 在 <code>ARC</code> 里的作用是一样的。只不过一个修饰属性一个修饰变量而已。参考 <a href="http://clang.llvm.org/docs/AutomaticReferenceCounting.html#property-declarations" target="_blank" rel="noopener">Property declarations</a></p>
+</li>
 <li><p><code>strong</code> 不能用来修饰非对象。否则编译器会报错 </p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Property with retain(or strong) attribute must be object type</span><br></pre></td></tr></table></figure>
 </li>
@@ -378,6 +378,7 @@
 </li>
 <li><p><code>objc_storeStrong</code> 方法的说明，当向一个 <code>__strong</code> 修饰符修饰的对象赋值的时候跟执行下面代码是一样的效果。说白了就是执行了 <code>objc_storeStrong</code> 的方法。</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//Precondition: object is a valid pointer to a __strong object which </span><br><span class="line">//is adequately aligned for a pointer. value is null or a pointer to a valid object.</span><br><span class="line">void objc_storeStrong(id *object, id value) &#123;</span><br><span class="line">  id oldValue = *object;</span><br><span class="line">  value = [value retain];</span><br><span class="line">  *object = value;</span><br><span class="line">  [oldValue release];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p> 值得说明的是 <code>FRObject *obj = [FRObject frobj];</code> 和 <code>FRObject *obj = temp;</code> 这两句代码编译器的处理是不一样的。第二句会执行如上 <code>objc_storeStrong</code> 的方法，但是第一句不会。我个人理解原因是 <code>obj</code> 初始化的时候并没有 <code>oldValue</code>，所以没有必要这么做。</p>
 </li>
 </ol>
@@ -390,8 +391,10 @@
 </ol>
 <h2 id="copy"><a href="#copy" class="headerlink" title="copy"></a>copy</h2><p><code>copy</code> 要求它修饰的属性必须实现 <code>NSCopy</code> 协议。本质上，当 <code>copy</code> 修饰的属性被赋值的时候，新值会收到一个 <code>copyWithZone</code> 方法，旧的值会被 release。</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//clang 编译后的源码</span><br><span class="line"> static void _I_Fan_setName_(Fan * self, SEL _cmd, NSString *name) &#123; </span><br><span class="line"> objc_setProperty (self, _cmd, __OFFSETOFIVAR__(struct Fan, _name), (id)name, 1, 1); </span><br><span class="line"> &#125;</span><br><span class="line"> //runtime 里的对应方法</span><br><span class="line"> void objc_setProperty(id self, SEL _cmd, ptrdiff_t offset, id newValue, BOOL atomic, signed char shouldCopy)</span><br><span class="line"> //reallySetProperty 有对应 copy 属性的具体实现.</span><br></pre></td></tr></table></figure>
+
 <p><code>copy</code> 的使用场景通常是你希望属性在赋值后一直保持值不变，而不是跟着它指向的对象一直变。讨论比较多的是 <code>NSString</code> 是应该用 <code>copy</code> 还是用 <code>strong</code> 去修饰</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@property (atomic) NSString *name;</span><br><span class="line"></span><br><span class="line">NSMutableString *nameString = [NSMutableString stringWithString:@&quot;John&quot;];</span><br><span class="line">Fan *fan = [[Fan alloc] init];</span><br><span class="line">fan.name = nameString;</span><br><span class="line">NSLog(@&quot;fan.name = %@ %p&quot;,fan.name,fan.name);</span><br><span class="line">[nameString appendString:@&quot;ny&quot;];</span><br><span class="line">NSLog(@&quot;fan.name = %@ %p&quot;,fan.name,fan.name);</span><br><span class="line">//输出结果如下</span><br><span class="line">2018-01-11 20:35:18.763988+0800 TTTTT[71790:3384299] fan.name = John 0x10051e9c0</span><br><span class="line">2018-01-11 20:35:18.764449+0800 TTTTT[71790:3384299] fan.name = Johnny 0x10051e9c0</span><br></pre></td></tr></table></figure>
+
 <p>可以看到 <code>fan.name</code> 在没有显式修改的时候被改掉了，这种情况出现在 <code>NSString</code> 指针子类 <code>NSMutableString</code> 的情况下，而 <code>NSMutablString</code> 的修改不会对本身地址产生影响。使用 <code>copy</code> 可以避免。个人觉得使用 <code>copy</code> 还是 <code>strong</code> 还是根据实际情况，如果出了问题知道为什么就好了。</p>
 <h2 id="assign"><a href="#assign" class="headerlink" title="assign"></a>assign</h2><p>值得注意的是 <code>MRC</code> 时代和 <code>ARC</code> 时代的 <code>assign</code> 使用多少有点区别的。<code>MRC</code> 的 <code>assign</code> 是可以修饰对象还有普通基本类型，因为你根本也没得选。但是 <code>ARC</code> 下虽然 <code>assgin</code> 也都可以修饰基本类型和对象，但是通常修饰对象的话不会用 <code>assign</code> ，因为缺少了 <code>weak</code> 修饰变量被释放时候置为 <code>nil</code> 的特性，很有可能出现内存问题。所以我们现在用 <code>assign</code> 修饰基本类型就好了，需要弱引用的时候用 <code>weak</code> 用来修饰对象。规则也比较明确。</p>
 <h2 id="unsafe-unretained"><a href="#unsafe-unretained" class="headerlink" title="unsafe_unretained"></a>unsafe_unretained</h2><p><code>unsafe_unretained</code> 其实就是阉割版本的 <code>weak</code> 实现，它缺少正是对象释放时候置为 <code>nil</code> 的特性。但是 <code>unsafe_unretained</code> 还能修饰基本数据类型，<code>weak</code> 不行。</p>
@@ -402,14 +405,18 @@
 <p>从这一点上看 <code>atomic</code> 似乎用处不是很大，同时 <code>atomic</code> 底层是用锁实现的，频繁写入会影响性能。个人认为最好的实践是，使用 <code>nonatomic</code> 然后自己去处理线程相关的东西。</p>
 <p>几个说明：</p>
 <ol>
-<li><code>atomic</code> 是默认属性。比如 <code>@property NSString *name;</code> 这种属性默认就是 <code>atomic</code> 修饰的。</li>
-<li><code>atomic</code> 的底层实现里，赋值和读取值都有锁的保护，而且使用的都是一个锁。</li>
+<li><p><code>atomic</code> 是默认属性。比如 <code>@property NSString *name;</code> 这种属性默认就是 <code>atomic</code> 修饰的。</p>
+</li>
+<li><p><code>atomic</code> 的底层实现里，赋值和读取值都有锁的保护，而且使用的都是一个锁。</p>
+</li>
 <li><p><code>atomic</code> 不允许开发者自己复写其 <code>getter</code> 方法，强制复写会得到一个警告。</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#Writable atomic property &apos;name&apos; cannot pair a synthesized setter with a user defined getter</span><br></pre></td></tr></table></figure>
+
 </li>
 </ol>
 <h2 id="readonly-amp-readwrite"><a href="#readonly-amp-readwrite" class="headerlink" title="readonly &amp; readwrite"></a>readonly &amp; readwrite</h2><p><code>readonly</code> 和 <code>readwrite</code> 其实就是编译器级别帮你做了只读和读写的处理。<br><code>readonly</code> 是告诉编译器不用生成 <code>setter</code> 方法，同时如果你对这个 <code>readonly</code> 属性赋值的时候编译器会报错  </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#Assignment to readonly property</span><br></pre></td></tr></table></figure>
+
 <p><code>readwrite</code> 是默认的属性，它会告诉编译器自动生成 <code>setter</code> 和 <code>getter</code> 方法。开发者可以随意复写这两个方法来满足自己的时机情况。</p>
 <h2 id="补充关于自动合成属性的声明。"><a href="#补充关于自动合成属性的声明。" class="headerlink" title="补充关于自动合成属性的声明。"></a>补充关于自动合成属性的声明。</h2><p><code>Clang</code> 提供了对已声明属性自动合成的支持。这个功能提供了没有被 <code>@dynamic</code> 修饰的属性的 <code>getter</code> 和 <code>setter</code> 方法，而不用用户手动添加。</p>
 <p>Clang provides support for autosynthesis of declared properties. Using this feature, clang provides default synthesis of those properties not declared @dynamic and not having user provided backing getter and setter methods. __has_feature(objc_default_synthesize_properties) checks for availability of this feature in version of clang being used.</p>
@@ -519,9 +526,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/avatar.png"
-                alt="FanFrank" />
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="FanFrank">
             
               <p class="site-author-name" itemprop="name">FanFrank</p>
               <p class="site-description motion-element" itemprop="description">iOS & macOS Develop</p>
@@ -534,7 +539,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -587,7 +592,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#strong"><span class="nav-number">1.</span> <span class="nav-text"><a href="#strong" class="headerlink" title="strong"></a>strong</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weak"><span class="nav-number">2.</span> <span class="nav-text"><a href="#weak" class="headerlink" title="weak"></a>weak</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy"><span class="nav-number">3.</span> <span class="nav-text"><a href="#copy" class="headerlink" title="copy"></a>copy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assign"><span class="nav-number">4.</span> <span class="nav-text"><a href="#assign" class="headerlink" title="assign"></a>assign</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#unsafe-unretained"><span class="nav-number">5.</span> <span class="nav-text"><a href="#unsafe-unretained" class="headerlink" title="unsafe_unretained"></a>unsafe_unretained</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#atomic-amp-nonatomic"><span class="nav-number">6.</span> <span class="nav-text"><a href="#atomic-amp-nonatomic" class="headerlink" title="atomic &amp; nonatomic"></a>atomic &amp; nonatomic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#readonly-amp-readwrite"><span class="nav-number">7.</span> <span class="nav-text"><a href="#readonly-amp-readwrite" class="headerlink" title="readonly &amp; readwrite"></a>readonly &amp; readwrite</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补充关于自动合成属性的声明。"><span class="nav-number">8.</span> <span class="nav-text"><a href="#&#x8865;&#x5145;&#x5173;&#x4E8E;&#x81EA;&#x52A8;&#x5408;&#x6210;&#x5C5E;&#x6027;&#x7684;&#x58F0;&#x660E;&#x3002;" class="headerlink" title="&#x8865;&#x5145;&#x5173;&#x4E8E;&#x81EA;&#x52A8;&#x5408;&#x6210;&#x5C5E;&#x6027;&#x7684;&#x58F0;&#x660E;&#x3002;"></a>&#x8865;&#x5145;&#x5173;&#x4E8E;&#x81EA;&#x52A8;&#x5408;&#x6210;&#x5C5E;&#x6027;&#x7684;&#x58F0;&#x660E;&#x3002;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些面试时常遇到的-QA"><span class="nav-number">9.</span> <span class="nav-text"><a href="#&#x4E00;&#x4E9B;&#x9762;&#x8BD5;&#x65F6;&#x5E38;&#x9047;&#x5230;&#x7684;-QA" class="headerlink" title="&#x4E00;&#x4E9B;&#x9762;&#x8BD5;&#x65F6;&#x5E38;&#x9047;&#x5230;&#x7684; QA"></a>&#x4E00;&#x4E9B;&#x9762;&#x8BD5;&#x65F6;&#x5E38;&#x9047;&#x5230;&#x7684; QA</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#strong"><span class="nav-number">1.</span> <span class="nav-text">strong</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weak"><span class="nav-number">2.</span> <span class="nav-text">weak</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy"><span class="nav-number">3.</span> <span class="nav-text">copy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assign"><span class="nav-number">4.</span> <span class="nav-text">assign</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#unsafe-unretained"><span class="nav-number">5.</span> <span class="nav-text">unsafe_unretained</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#atomic-amp-nonatomic"><span class="nav-number">6.</span> <span class="nav-text">atomic &amp; nonatomic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#readonly-amp-readwrite"><span class="nav-number">7.</span> <span class="nav-text">readonly &amp; readwrite</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补充关于自动合成属性的声明。"><span class="nav-number">8.</span> <span class="nav-text">补充关于自动合成属性的声明。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些面试时常遇到的-QA"><span class="nav-number">9.</span> <span class="nav-text">一些面试时常遇到的 QA</span></a></li></ol></div>
             
 
           </div>
@@ -607,7 +612,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

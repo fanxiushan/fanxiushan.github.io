@@ -126,7 +126,7 @@
 
 
 
-  <title>属性和运行时 | FanFrank's Site</title>
+  <title>归档 | FanFrank's Site</title>
   
 
 
@@ -154,7 +154,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left page-archive">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -260,193 +260,72 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  
+  
+  
+  <div class="post-block archive">
+    <div id="posts" class="posts-collapse">
+      <span class="archive-move-on"></span>
 
-  
+      <span class="archive-page-counter">
+        
+        
+        
+          
+        
+        嗯..! 目前共计 12 篇日志。 继续努力。
+      </span>
 
-  
-  
-  
+      
 
-  
+        
+        
+        
+
+        
+          
+          <div class="collection-title">
+            <h1 class="archive-year" id="archive-year-2019">2019</h1>
+          </div>
+        
+        
+
+        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/06/属性和运行时/">
+    <header class="post-header">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="FanFrank">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="FanFrank's Site">
-    </span>
-
-    
-      <header class="post-header">
-
+      <h2 class="post-title">
         
-        
-          <h1 class="post-title" itemprop="name headline">属性和运行时</h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
+            <a class="post-title-link" href="/2019/12/29/App-Store-隐私政策网址/" itemprop="url">
               
-                <span class="post-meta-item-text">发表于</span>
+                <span itemprop="name">App Store 隐私政策网址</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-06T17:30:03+08:00">2018-01-06</time>
-            
+            </a>
+        
+      </h2>
 
-            
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated" datetime="2019-12-29T22:13:44+08:00" content="2019-12-29">
+          12-29
+        </time>
+      </div>
 
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/01/06/属性和运行时/" class="leancloud_visitors" data-flag-title="属性和运行时">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <ol>
-<li><code>@property</code> 的本质是什么?</li>
-<li><code>@property</code> 和运行时有什么关系?</li>
-<li><code>@property</code> 一个 demo</li>
-</ol>
-<h1 id="property-的本质是什么"><a href="#property-的本质是什么" class="headerlink" title="property 的本质是什么"></a><code>property</code> 的本质是什么</h1><p><code>@property</code> 的本质就是成员变量加 <code>getter</code> 和 <code>setter</code> 方法。<code>getter</code> 和 <code>setter</code> 方法是编译器自动为我们生成的。我们也可以尝试去复写 <code>getter</code> 和 <code>setter</code> 方法，在设置成员变量前后增加一些我们想要的业务逻辑。</p>
-<p><code>@property</code> 有不同的 <code>attribute</code> : <code>readonly</code>,<code>atomic</code>,<code>nonatomic</code> 等等。编译器会根据不同的 <code>attribute</code> 生成不同的 <code>getter</code> 和 <code>setter</code> 方法</p>
-<h1 id="property-和运行时有什么关系"><a href="#property-和运行时有什么关系" class="headerlink" title="property 和运行时有什么关系?"></a><code>property</code> 和运行时有什么关系?</h1><p>来看下运行时系统对 <code>property</code> 相关类型的定义</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">template &lt;typename Element, typename List, uint32_t FlagMask&gt;</span><br><span class="line">struct property_list_t : entsize_list_tt&lt;property_t, property_list_t, 0&gt; &#123;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">typedef struct property_t *objc_property_t;</span><br><span class="line">struct property_t &#123;</span><br><span class="line">    const char *name;</span><br><span class="line">    const char *attributes;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">/// Defines a property attribute</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    const char *name;           /**&lt; The name of the attribute */</span><br><span class="line">    const char *value;          /**&lt; The value of the attribute (usually empty) */</span><br><span class="line">&#125; objc_property_attribute_t;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><code>entsize_list_tt</code> 是通过 <code>C++</code> 的容器类，提供了容器类的基本方法，通过这些基本方法可以管理数据并以遍历的方式获取容器内的数据。<code>property_list_t</code> 是管理 <code>property_t</code> 的一个属性类型。</p>
-</blockquote>
-<p>了解了基本数据类型之后，我们来讨论几个问题</p>
-<h2 id="类是怎么获取到-property-的"><a href="#类是怎么获取到-property-的" class="headerlink" title="类是怎么获取到 @property 的?"></a>类是怎么获取到 <code>@property</code> 的?</h2><p>看源码及注释</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">objc_property_t class_getProperty(Class cls, const char *name)</span><br><span class="line">&#123;</span><br><span class="line">    .......</span><br><span class="line">    //依次遍历父类</span><br><span class="line">    for ( ; cls; cls = cls-&gt;superclass) &#123;</span><br><span class="line">        //遍历当前类的属性列表</span><br><span class="line">        for (auto&amp; prop : cls-&gt;data()-&gt;properties) &#123;</span><br><span class="line">            //比较字符串如果相等就返回当前的 property</span><br><span class="line">            if (0 == strcmp(name, prop.name)) &#123;  </span><br><span class="line">                return (objc_property_t)&amp;prop;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="类是怎么增加-property-的"><a href="#类是怎么增加-property-的" class="headerlink" title="类是怎么增加 property 的?"></a>类是怎么增加 <code>property</code> 的?</h2><p>看源码及注释</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">static bool _class_addProperty(Class cls, const char *name, </span><br><span class="line">                   const objc_property_attribute_t *attrs, unsigned int count, </span><br><span class="line">                   bool replace)</span><br><span class="line">&#123;</span><br><span class="line">    if (!cls) return NO;</span><br><span class="line">    if (!name) return NO;</span><br><span class="line">    //先从当前类获取指定名称的 property，如果有而且 caller 不想替换则直接返回</span><br><span class="line">    property_t *prop = class_getProperty(cls, name);</span><br><span class="line">    if (prop  &amp;&amp;  !replace) &#123;</span><br><span class="line">        // already exists, refuse to replace</span><br><span class="line">        return NO;</span><br><span class="line">    &#125; </span><br><span class="line">    //替换当前 property 流程，其实就是把 property 相关的 attributes 进行替换。</span><br><span class="line">    else if (prop) &#123;</span><br><span class="line">        // replace existing</span><br><span class="line">        rwlock_writer_t lock(runtimeLock);</span><br><span class="line">        try_free(prop-&gt;attributes);</span><br><span class="line">        //参数 count 是 attrs 的数量。</span><br><span class="line">        prop-&gt;attributes = copyPropertyAttributeString(attrs, count);</span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        //为新的 property 分配空空间。值得注意的是这里并不是直接分配的 property 而是通过 property_list 进行操作的。</span><br><span class="line">        property_list_t *proplist = (property_list_t *)malloc(sizeof(*proplist));</span><br><span class="line">        proplist-&gt;count = 1;</span><br><span class="line">        proplist-&gt;entsizeAndFlags = sizeof(proplist-&gt;first);</span><br><span class="line">        proplist-&gt;first.name = strdupIfMutable(name);</span><br><span class="line">        proplist-&gt;first.attributes = copyPropertyAttributeString(attrs, count);</span><br><span class="line">        //cls-&gt;data() 拿到 class_rw_t 结构体，结构体里的 properties 是 property_array_t 类型，将新的 property 加入到 property 数组中。</span><br><span class="line">        cls-&gt;data()-&gt;properties.attachLists(&amp;proplist, 1);</span><br><span class="line">        </span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="property-和成员变量是怎么对应起来的？"><a href="#property-和成员变量是怎么对应起来的？" class="headerlink" title="property 和成员变量是怎么对应起来的？"></a><code>property</code> 和成员变量是怎么对应起来的？</h2><p>其实是在编译这一步就做好了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@interface Fan : NSObject</span><br><span class="line">@property (nonatomic,strong) NSString *name;</span><br><span class="line">@end</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
-
-<p>编译 clang -rewrite-objc main.m  之后结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct objc_object Fan;</span><br><span class="line"></span><br><span class="line">extern &quot;C&quot; unsigned long OBJC_IVAR_$_Fan$_name;</span><br><span class="line">struct Fan_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	NSString *_name;</span><br><span class="line">&#125;;</span><br><span class="line">// @property (atomic,strong) NSString *name;</span><br><span class="line">/* @end */</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>可以看到 <code>name</code> 属性变成了成员变量 <code>_name</code>。</p>
-<h2 id="property-一个-demo"><a href="#property-一个-demo" class="headerlink" title="property 一个 demo"></a><code>property</code> 一个 demo</h2><p>我们之前猜测不同 <code>property</code> 的 <code>attribute</code> 会对编译器造成影响，即生成出来的 <code>setter</code> 和 <code>getter</code> 方法可能不同，比如 <code>atomic</code> 的 <code>setter</code> 方法可能会有锁的实现，于是我补充了上面源码的 <code>getter</code> 和 <code>setter</code> 实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">static NSString * _I_Fan_name(Fan * self, SEL _cmd) &#123; return (*(NSString **)((char *)self + OBJC_IVAR_$_Fan$_name)); &#125;</span><br><span class="line">static void _I_Fan_setName_(Fan * self, SEL _cmd, NSString *name) &#123; (*(NSString **)((char *)self + OBJC_IVAR_$_Fan$_name)) = name; &#125;</span><br></pre></td></tr></table></figure>
-
-<p>发现 setter 并没有什么特别的地方… </p>
-<p>难道我的验证有问题吗？感觉不应该。我尝试在 demo 中给 <code>name</code> 属性赋值，并打了个符号断点 <code>objc_setProperty_atomic</code> 发现这个方法确实走了，所以 <code>clang</code> 出来的结果应该是有问题的。怎么生成更准确的编译结果我也不清楚。。 </p>
-<p><img src="/media/Jietu20180106-185957.png" alt="Jietu20180106-185957"></p>
-<p>你也许会问 <code>objc_setProperty_atomic</code> 这个是干什么用的，翻源码到 <code>objc-accessors.mm</code> 这个文件看，可以看到不同的修饰符走了不同的设置属性的方法比如 <code>objc_setProperty_nonatomic</code>，<code>objc_setProperty_atomic</code>，<code>objc_setProperty_atomic_copy</code> 最终他们都调用了 <code>reallySetProperty</code> 这个方法接收了众多参数，根据不同的参数，走了不同的执行流。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">static inline void reallySetProperty(id self, SEL _cmd, id newValue, ptrdiff_t offset, bool atomic, bool copy, bool mutableCopy)</span><br><span class="line">&#123;</span><br><span class="line">    if (offset == 0) &#123;</span><br><span class="line">        object_setClass(self, newValue);</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    id oldValue;</span><br><span class="line">    //这里的 offset 其实就是上一步编译时候确定的。</span><br><span class="line">    id *slot = (id*) ((char*)self + offset);</span><br><span class="line">    if (copy) &#123;</span><br><span class="line">        newValue = [newValue copyWithZone:nil];</span><br><span class="line">    &#125; else if (mutableCopy) &#123;</span><br><span class="line">        newValue = [newValue mutableCopyWithZone:nil];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (*slot == newValue) return;</span><br><span class="line">        newValue = objc_retain(newValue);</span><br><span class="line">    &#125;</span><br><span class="line">    if (!atomic) &#123;</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        //在这里看到 atomic 确实是使用自旋锁来对赋值进行了保护。</span><br><span class="line">        spinlock_t&amp; slotlock = PropertyLocks[slot];</span><br><span class="line">        slotlock.lock();</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;        </span><br><span class="line">        slotlock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    objc_release(oldValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，属性机制的实现不仅靠编译时，运行时也起了很大的作用。</p>
-<p>一个思考，能否在运行时候动态添加属性呢？</p>
-
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/12/29/NSError-最佳实践/" rel="next" title="NSError 最佳实践">
-                <i class="fa fa-chevron-left"></i> NSError 最佳实践
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/09/属性-attribute-总结/" rel="prev" title="属性 attribute 总结">
-                属性 attribute 总结 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
+    </header>
   </article>
 
 
 
-    <div class="post-spread">
       
+
     </div>
   </div>
+  
+  
+  
+
+  
+
 
 
           </div>
@@ -454,10 +333,6 @@
 
 
           
-
-  
-
-
 
         </div>
         
@@ -478,17 +353,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -548,22 +414,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#property-的本质是什么"><span class="nav-number">1.</span> <span class="nav-text">property 的本质是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#property-和运行时有什么关系"><span class="nav-number">2.</span> <span class="nav-text">property 和运行时有什么关系?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#类是怎么获取到-property-的"><span class="nav-number">2.1.</span> <span class="nav-text">类是怎么获取到 @property 的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类是怎么增加-property-的"><span class="nav-number">2.2.</span> <span class="nav-text">类是怎么增加 property 的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#property-和成员变量是怎么对应起来的？"><span class="nav-number">2.3.</span> <span class="nav-text">property 和成员变量是怎么对应起来的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#property-一个-demo"><span class="nav-number">2.4.</span> <span class="nav-text">property 一个 demo</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -695,10 +545,6 @@
 
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.0"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=6.0.0"></script>
-
-
 
   
 

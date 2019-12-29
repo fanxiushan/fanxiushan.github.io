@@ -126,7 +126,7 @@
 
 
 
-  <title>属性和运行时 | FanFrank's Site</title>
+  <title>FanFrank's Site</title>
   
 
 
@@ -154,7 +154,8 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -259,9 +260,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-expand">
+  <section id="posts" class="posts-expand">
     
+      
 
   
 
@@ -276,7 +277,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/06/属性和运行时/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/28/Bonjour-的理解/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FanFrank">
@@ -293,7 +294,9 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">属性和运行时</h1>
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/28/Bonjour-的理解/" itemprop="url">Bonjour 的理解</a></h1>
         
 
         <div class="post-meta">
@@ -305,7 +308,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-06T17:30:03+08:00">2018-01-06</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T20:20:41+08:00">2017-12-28</time>
             
 
             
@@ -321,7 +324,7 @@
 
           
           
-             <span id="/2018/01/06/属性和运行时/" class="leancloud_visitors" data-flag-title="属性和运行时">
+             <span id="/2017/12/28/Bonjour-的理解/" class="leancloud_visitors" data-flag-title="Bonjour 的理解">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -352,45 +355,64 @@
       
 
       
-        <ol>
-<li><code>@property</code> 的本质是什么?</li>
-<li><code>@property</code> 和运行时有什么关系?</li>
-<li><code>@property</code> 一个 demo</li>
+        
+          
+            <p>先提问几个问题</p>
+<ol>
+<li>什么是 Bonjour？</li>
+<li>Bonjour 提供了哪些服务？</li>
+<li>Bonjour 的工作机制是什么样子的?</li>
+<li>Bonjour 实践</li>
+<li>Bonjour 异常分析</li>
 </ol>
-<h1 id="property-的本质是什么"><a href="#property-的本质是什么" class="headerlink" title="property 的本质是什么"></a><code>property</code> 的本质是什么</h1><p><code>@property</code> 的本质就是成员变量加 <code>getter</code> 和 <code>setter</code> 方法。<code>getter</code> 和 <code>setter</code> 方法是编译器自动为我们生成的。我们也可以尝试去复写 <code>getter</code> 和 <code>setter</code> 方法，在设置成员变量前后增加一些我们想要的业务逻辑。</p>
-<p><code>@property</code> 有不同的 <code>attribute</code> : <code>readonly</code>,<code>atomic</code>,<code>nonatomic</code> 等等。编译器会根据不同的 <code>attribute</code> 生成不同的 <code>getter</code> 和 <code>setter</code> 方法</p>
-<h1 id="property-和运行时有什么关系"><a href="#property-和运行时有什么关系" class="headerlink" title="property 和运行时有什么关系?"></a><code>property</code> 和运行时有什么关系?</h1><p>来看下运行时系统对 <code>property</code> 相关类型的定义</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">template &lt;typename Element, typename List, uint32_t FlagMask&gt;</span><br><span class="line">struct property_list_t : entsize_list_tt&lt;property_t, property_list_t, 0&gt; &#123;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">typedef struct property_t *objc_property_t;</span><br><span class="line">struct property_t &#123;</span><br><span class="line">    const char *name;</span><br><span class="line">    const char *attributes;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">/// Defines a property attribute</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    const char *name;           /**&lt; The name of the attribute */</span><br><span class="line">    const char *value;          /**&lt; The value of the attribute (usually empty) */</span><br><span class="line">&#125; objc_property_attribute_t;</span><br></pre></td></tr></table></figure>
-
+<h2 id="什么是-Bonjour"><a href="#什么是-Bonjour" class="headerlink" title="什么是 Bonjour"></a>什么是 Bonjour</h2><p>Bonjour 被认为是 0 网络配置，自动发现 PC，普通设备和 IP 网络服务的协议。Bonjour 使用工业标准的 IP 协议，允许一台设备在不需要输入对方 IP 地址或配置 DNS 服务器的情况下自动发现其他设备。特别是 Bonjour 不需要 DHCP 服务器就能使 IP 自动分配，同时无需 DNS 服务器能给 IP 命名，发现服务不需要额外的服务器。同时它是个开放的协议。</p>
 <blockquote>
-<p><code>entsize_list_tt</code> 是通过 <code>C++</code> 的容器类，提供了容器类的基本方法，通过这些基本方法可以管理数据并以遍历的方式获取容器内的数据。<code>property_list_t</code> 是管理 <code>property_t</code> 的一个属性类型。</p>
+<p>Bonjour, also known as zero-configuration networking, enables automatic discovery of computers, devices, and services on IP networks. Bonjour uses industry standard IP protocols to allow devices to automatically discover each other without the need to enter IP addresses or configure DNS servers. See the Bonjour Protocol Specifications section for more details on the underlying standards.  <a href="https://developer.apple.com/library/content/qa/qa1690/_index.html" target="_blank" rel="noopener">Technical Q&amp;A QA1690 Common QA for Bonjour</a></p>
 </blockquote>
-<p>了解了基本数据类型之后，我们来讨论几个问题</p>
-<h2 id="类是怎么获取到-property-的"><a href="#类是怎么获取到-property-的" class="headerlink" title="类是怎么获取到 @property 的?"></a>类是怎么获取到 <code>@property</code> 的?</h2><p>看源码及注释</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">objc_property_t class_getProperty(Class cls, const char *name)</span><br><span class="line">&#123;</span><br><span class="line">    .......</span><br><span class="line">    //依次遍历父类</span><br><span class="line">    for ( ; cls; cls = cls-&gt;superclass) &#123;</span><br><span class="line">        //遍历当前类的属性列表</span><br><span class="line">        for (auto&amp; prop : cls-&gt;data()-&gt;properties) &#123;</span><br><span class="line">            //比较字符串如果相等就返回当前的 property</span><br><span class="line">            if (0 == strcmp(name, prop.name)) &#123;  </span><br><span class="line">                return (objc_property_t)&amp;prop;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一个实际场景是，我的电脑想用使用打印机打印一些资料，Bonjour 可以使打印机自动连接到网络，同时给打印机分配一个 IP 地址，无需任何配置，相同网络下的电脑就可以发现这台打印机，并识别到打印机的 IP 地址，进而建立连接完成打印工作。而且如果你以后地址被动态分配的地址被改变了，Bonjour 还能继续发现新的地址。</p>
+<h2 id="Bonjour-提供了哪些服务？"><a href="#Bonjour-提供了哪些服务？" class="headerlink" title="Bonjour 提供了哪些服务？"></a>Bonjour 提供了哪些服务？</h2><ol>
+<li>addressing  (向 host 分配 IP 地址)</li>
+<li>naming （使用名字代表 host 而不是 IP 地址）</li>
+<li>service discovery （自动发现网络中的服务）</li>
+</ol>
+<h2 id="Bonjour-的工作机制是什么样子的"><a href="#Bonjour-的工作机制是什么样子的" class="headerlink" title="Bonjour 的工作机制是什么样子的?"></a>Bonjour 的工作机制是什么样子的?</h2><p>其实就是说一下上面三个服务的实现机制</p>
+<ol>
+<li><p>分配 IP 的原理，使用链路本地地址（link-local address） 来解决。</p>
+<p>IPv6 协议包含了这种技术。IPv4 是使用另外的实现来达到这个目的，IPv4 的实现原理是在本地链路中随机取一个地址然后测试是不是被占用，如果没有占用则分配其为本地链路地址，否则重新生成并继续测试占用情况。 link-local address 这项技术被绝大多数操作系统实现，如果硬件厂商想要使用 Bonjour 服务也必须在自己的设备里实现这项技术。</p>
+<p>对 link-local address 有兴趣的可以看下<a href="https://en.wikipedia.org/wiki/Link-local_address" target="_blank" rel="noopener">它的 wiki</a></p>
+</li>
+<li><p>在本地网络中解决 IP 到名字的转换的合适方案是使用 <code>Multicast DNS (mDNS)</code>。</p>
+<p> 具体实现原理是使用 IP 多播的方式在本地网络中发送 DNS 格式的查询，因为没有一个统一的 DNS 服务器去响应这些查询，所以每个设备或者服务都会去返回自己的 DNS 响应</p>
+<p> 可以通过 Bonjour 提供的 API 注册服务，Bonjour 可以自动广播你的服务，任何查询你的服务的请求都会直接被转到正确的 IP 和端口。</p>
+<p> 每个服务和设备都应该只有一个名字，这个名字只在当前的网络环境下起作用。这个起名字的过程大概是这样的</p>
+<ol>
+<li><p>硬件厂商的设备通过发送带有自己名字（XYZ-LaserPrinter.local）的查询来看下是否当前网络中有一样的，如果有响应那就应该重新起个名字（XYZ-LaserPrinter-1.local 这个名字是在原来名字的基础上继续拼接了一个数字）如果没有则继续之前的操作。直到新的名字的查询没有响应。</p>
+</li>
+<li><p>软件服务是当注册的时候自己起一个名字，如果名字已经被使用了，则 Bonjour 协议会重新给它起一个。</p>
+<p>为了向系统表明 local host，macOS 上会在 local host 后面再加个点,比如 <code>Steve.local.</code>。 这部分命名规则比较复杂，这里不赘述了。</p>
+</li>
+</ol>
+</li>
+<li><p>通过 DNS 发现服务的过程称为 DNS-SD（DNS Service Discovery）。发现服务这部分的内容还是建立在前面两部的基础上，一个指定服务类型和域名的 mDNS 查询发出去后，有符合条件的服务会返回它们的名字，结果包含了你可选择的一系列服务。和传统的查询服务不同，Bonjour 的服务更类似于询问「我想要的打印服务有没有」，而不是询问每个设备你在运行什么服务（Apple 官方对后者的的说明是，这种询问是以设备为中心的，而前者是以服务为中心）前者相比后者来说对 Client 更加有意义，Client 并不关心其他设备是干嘛的，不断询问只会造成网络压力。</p>
+</li>
+</ol>
+<h2 id="Bonjour-实践"><a href="#Bonjour-实践" class="headerlink" title="Bonjour 实践"></a>Bonjour 实践</h2><p>macOS 系统提供了一个名为 <code>dns-sd</code> 的 Multicast DNS (mDNS) 和 DNS Service Discovery (DNS-SD) 测试工具。</p>
+<p>一个例子，我想查看当前网络下能提供打印的服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ dns-sd -B _printer</span><br><span class="line">Browsing for _printer._tcp</span><br><span class="line">DATE: ---Thu 28 Dec 2017---</span><br><span class="line">19:45:30.989  ...STARTING...</span><br><span class="line">Timestamp     A/R    Flags  if Domain               Service Type         Instance Name</span><br><span class="line">19:45:30.990  Add        3   5 local.               _printer._tcp.       Brother MFC-8510DN [30055c9332be] (2)</span><br><span class="line">19:45:30.990  Add        2   5 local.               _printer._tcp.       Brother MFC-8510DN [30055c92a583] (2)</span><br></pre></td></tr></table></figure>
 
-<h2 id="类是怎么增加-property-的"><a href="#类是怎么增加-property-的" class="headerlink" title="类是怎么增加 property 的?"></a>类是怎么增加 <code>property</code> 的?</h2><p>看源码及注释</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">static bool _class_addProperty(Class cls, const char *name, </span><br><span class="line">                   const objc_property_attribute_t *attrs, unsigned int count, </span><br><span class="line">                   bool replace)</span><br><span class="line">&#123;</span><br><span class="line">    if (!cls) return NO;</span><br><span class="line">    if (!name) return NO;</span><br><span class="line">    //先从当前类获取指定名称的 property，如果有而且 caller 不想替换则直接返回</span><br><span class="line">    property_t *prop = class_getProperty(cls, name);</span><br><span class="line">    if (prop  &amp;&amp;  !replace) &#123;</span><br><span class="line">        // already exists, refuse to replace</span><br><span class="line">        return NO;</span><br><span class="line">    &#125; </span><br><span class="line">    //替换当前 property 流程，其实就是把 property 相关的 attributes 进行替换。</span><br><span class="line">    else if (prop) &#123;</span><br><span class="line">        // replace existing</span><br><span class="line">        rwlock_writer_t lock(runtimeLock);</span><br><span class="line">        try_free(prop-&gt;attributes);</span><br><span class="line">        //参数 count 是 attrs 的数量。</span><br><span class="line">        prop-&gt;attributes = copyPropertyAttributeString(attrs, count);</span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        //为新的 property 分配空空间。值得注意的是这里并不是直接分配的 property 而是通过 property_list 进行操作的。</span><br><span class="line">        property_list_t *proplist = (property_list_t *)malloc(sizeof(*proplist));</span><br><span class="line">        proplist-&gt;count = 1;</span><br><span class="line">        proplist-&gt;entsizeAndFlags = sizeof(proplist-&gt;first);</span><br><span class="line">        proplist-&gt;first.name = strdupIfMutable(name);</span><br><span class="line">        proplist-&gt;first.attributes = copyPropertyAttributeString(attrs, count);</span><br><span class="line">        //cls-&gt;data() 拿到 class_rw_t 结构体，结构体里的 properties 是 property_array_t 类型，将新的 property 加入到 property 数组中。</span><br><span class="line">        cls-&gt;data()-&gt;properties.attachLists(&amp;proplist, 1);</span><br><span class="line">        </span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我啥都不指定是默认会列出当前提供 http 的服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ dns-sd -B  </span><br><span class="line">Browsing for _http._tcp</span><br><span class="line">DATE: ---Thu 28 Dec 2017---</span><br><span class="line">19:45:49.802  ...STARTING...</span><br><span class="line">Timestamp     A/R    Flags  if Domain               Service Type         Instance Name</span><br><span class="line">19:45:49.803  Add        3   8 local.               _http._tcp.          webserver (5)</span><br><span class="line">19:45:49.804  Add        3   8 local.               _http._tcp.          bxxx</span><br></pre></td></tr></table></figure>
 
-<h2 id="property-和成员变量是怎么对应起来的？"><a href="#property-和成员变量是怎么对应起来的？" class="headerlink" title="property 和成员变量是怎么对应起来的？"></a><code>property</code> 和成员变量是怎么对应起来的？</h2><p>其实是在编译这一步就做好了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@interface Fan : NSObject</span><br><span class="line">@property (nonatomic,strong) NSString *name;</span><br><span class="line">@end</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<p>还有一个 Bonjour Browser 的软件(如图)来提供可视化的 Bonjour 服务浏览<br><img src="/media/Jietu20171228-195757.png" alt="Jietu20171228-195757"></p>
+<h2 id="为啥有的时候连不上-Bonjour"><a href="#为啥有的时候连不上-Bonjour" class="headerlink" title="为啥有的时候连不上 Bonjour?"></a>为啥有的时候连不上 Bonjour?</h2><ol>
+<li>确认路由器开启了组播模式，某些路由器（如思科）默认关闭了「组播模式」，故无法在此网络下搜索到设备.</li>
+<li>跟二次认证网络应该也没有关系.</li>
+<li>如果是用 iPhone 设备有的时候跟 iOS 系统版本也有关系，参考 <a href="https://stackoverflow.com/questions/38969032/nsnetservicebrowser-can-not-find-service-sometimes" target="_blank" rel="noopener">这里</a></li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://developer.apple.com/library/content/qa/qa1690/_index.html" target="_blank" rel="noopener">Technical Q&amp;A QA1690 Common QA for Bonjour</a><br><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/NetServices/Introduction.html" target="_blank" rel="noopener">Bonjour Overview</a><br><a href="https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/dns-sd.1.html" target="_blank" rel="noopener">dns-sd</a></p>
 
-<p>编译 clang -rewrite-objc main.m  之后结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct objc_object Fan;</span><br><span class="line"></span><br><span class="line">extern &quot;C&quot; unsigned long OBJC_IVAR_$_Fan$_name;</span><br><span class="line">struct Fan_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	NSString *_name;</span><br><span class="line">&#125;;</span><br><span class="line">// @property (atomic,strong) NSString *name;</span><br><span class="line">/* @end */</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>可以看到 <code>name</code> 属性变成了成员变量 <code>_name</code>。</p>
-<h2 id="property-一个-demo"><a href="#property-一个-demo" class="headerlink" title="property 一个 demo"></a><code>property</code> 一个 demo</h2><p>我们之前猜测不同 <code>property</code> 的 <code>attribute</code> 会对编译器造成影响，即生成出来的 <code>setter</code> 和 <code>getter</code> 方法可能不同，比如 <code>atomic</code> 的 <code>setter</code> 方法可能会有锁的实现，于是我补充了上面源码的 <code>getter</code> 和 <code>setter</code> 实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">static NSString * _I_Fan_name(Fan * self, SEL _cmd) &#123; return (*(NSString **)((char *)self + OBJC_IVAR_$_Fan$_name)); &#125;</span><br><span class="line">static void _I_Fan_setName_(Fan * self, SEL _cmd, NSString *name) &#123; (*(NSString **)((char *)self + OBJC_IVAR_$_Fan$_name)) = name; &#125;</span><br></pre></td></tr></table></figure>
-
-<p>发现 setter 并没有什么特别的地方… </p>
-<p>难道我的验证有问题吗？感觉不应该。我尝试在 demo 中给 <code>name</code> 属性赋值，并打了个符号断点 <code>objc_setProperty_atomic</code> 发现这个方法确实走了，所以 <code>clang</code> 出来的结果应该是有问题的。怎么生成更准确的编译结果我也不清楚。。 </p>
-<p><img src="/media/Jietu20180106-185957.png" alt="Jietu20180106-185957"></p>
-<p>你也许会问 <code>objc_setProperty_atomic</code> 这个是干什么用的，翻源码到 <code>objc-accessors.mm</code> 这个文件看，可以看到不同的修饰符走了不同的设置属性的方法比如 <code>objc_setProperty_nonatomic</code>，<code>objc_setProperty_atomic</code>，<code>objc_setProperty_atomic_copy</code> 最终他们都调用了 <code>reallySetProperty</code> 这个方法接收了众多参数，根据不同的参数，走了不同的执行流。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">static inline void reallySetProperty(id self, SEL _cmd, id newValue, ptrdiff_t offset, bool atomic, bool copy, bool mutableCopy)</span><br><span class="line">&#123;</span><br><span class="line">    if (offset == 0) &#123;</span><br><span class="line">        object_setClass(self, newValue);</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    id oldValue;</span><br><span class="line">    //这里的 offset 其实就是上一步编译时候确定的。</span><br><span class="line">    id *slot = (id*) ((char*)self + offset);</span><br><span class="line">    if (copy) &#123;</span><br><span class="line">        newValue = [newValue copyWithZone:nil];</span><br><span class="line">    &#125; else if (mutableCopy) &#123;</span><br><span class="line">        newValue = [newValue mutableCopyWithZone:nil];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (*slot == newValue) return;</span><br><span class="line">        newValue = objc_retain(newValue);</span><br><span class="line">    &#125;</span><br><span class="line">    if (!atomic) &#123;</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        //在这里看到 atomic 确实是使用自旋锁来对赋值进行了保护。</span><br><span class="line">        spinlock_t&amp; slotlock = PropertyLocks[slot];</span><br><span class="line">        slotlock.lock();</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;        </span><br><span class="line">        slotlock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    objc_release(oldValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，属性机制的实现不仅靠编译时，运行时也起了很大的作用。</p>
-<p>一个思考，能否在运行时候动态添加属性呢？</p>
-
+          
+        
       
     </div>
     
@@ -407,32 +429,12 @@
       
 
       
-      
+
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/12/29/NSError-最佳实践/" rel="next" title="NSError 最佳实践">
-                <i class="fa fa-chevron-left"></i> NSError 最佳实践
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/09/属性-attribute-总结/" rel="prev" title="属性 attribute 总结">
-                属性 attribute 总结 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
-
-      
+        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -442,11 +444,179 @@
   </article>
 
 
+    
+      
 
-    <div class="post-spread">
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/21/GCD-的理解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FanFrank">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FanFrank's Site">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/21/GCD-的理解/" itemprop="url">GCD 的理解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-21T18:14:59+08:00">2017-12-21</time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/12/21/GCD-的理解/" class="leancloud_visitors" data-flag-title="GCD 的理解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="GCD-的理解"><a href="#GCD-的理解" class="headerlink" title="GCD 的理解"></a>GCD 的理解</h1><p><a href="https://apple.github.io/swift-corelibs-libdispatch/" target="_blank" rel="noopener">Grand Central Dispatch</a> (GCD or libdispatch) 为多核上的并行程序执行上的提供了全面支持。GCD 的出现就是系统帮助开发者管理了一些线程方面的工作让开发者将重心放入自己的业务。减轻了开发者的负担，同时也保证了并行执行的高效。</p>
+<h2 id="GCD-中线程和队列的关系"><a href="#GCD-中线程和队列的关系" class="headerlink" title="GCD 中线程和队列的关系"></a>GCD 中线程和队列的关系</h2><p>首先要明确一下这俩完全不一样的东西，GCD 的线程管理是系统帮助维护了一个线程池，系统自己会去根据当前负载去决定调用线程池的哪个线程去执行对应队列里的 block 任务。</p>
+<p>对于 GCD 本身而言，GCD 本身是需要关注线程的管理，开发者使用 GCD 的时候，可以不那么关心线程的知识，省去自己创建线程，管理线程等一系列繁琐的事情，而是专心使用 GCD 提供的队列的功能。</p>
+<p>之前看微博上有 iOS 开发小集的知识点，有一点是说如何「判断是否在主队列运行」。当时特别好奇什么情况下会用到这种判断呢？后来在一个 issue 里发现了这种判断的使用场景。</p>
+<p>说明这个场景之前问个问题，主线程和主队列是什么关系？答案：主队列一定位于主线程，但是主线程可能包含别的队列。可以写个 demo 测试一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">            NSLog(@&quot;hello world&quot;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如图，<br><img src="/media/Jietu20171221-160748.png" alt="Jietu20171221-160748"></p>
+<p>而在主线程的主队列里执行的话断点应该是这样的<br><img src="/media/Jietu20171221-160859.png" alt="Jietu20171221-160859"></p>
+<p>好，明确了这一点后我们继续说一下什么场景会用到判断当前是否在主队列？即当执行一些 UI 操作的时候我们不仅仅需要判断是否是主线程，还要判断是否是主队列。</p>
+<p>诶？难道 UI 操作放到主线程还不够安全吗？是的。<br>相关问题：</p>
+<ul>
+<li><a href="http://www.openradar.me/24025596" target="_blank" rel="noopener">http://www.openradar.me/24025596</a></li>
+<li><a href="https://github.com/ReactiveCocoa/ReactiveCocoa/issues/2635#issuecomment-170215083" target="_blank" rel="noopener">https://github.com/ReactiveCocoa/ReactiveCocoa/issues/2635#issuecomment-170215083</a><br>  <img src="/media/Jietu20171221-163735.png" alt="Jietu20171221-163735"></li>
+</ul>
+<p>我们之前被 Apple 教育：UI 操作要放到主线程中执行，但是现在发现放到主线程中执行的时候，因为 Apple 的不靠谱，我们只能自己动手去做个判断。判断主线程的方式就和 iOS 知识小集里的说的一样使用如下代码，通过 key/value 的方式来设置和获取指定的 queue.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">BOOL RCTIsMainQueue()</span><br><span class="line">&#123;</span><br><span class="line">  static void *mainQueueKey = &amp;mainQueueKey;</span><br><span class="line">  static dispatch_once_t onceToken;</span><br><span class="line">  dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">    dispatch_queue_set_specific(dispatch_get_main_queue(),</span><br><span class="line">                                mainQueueKey, mainQueueKey, NULL);</span><br><span class="line">  &#125;);</span><br><span class="line">  return dispatch_get_specific(mainQueueKey) == mainQueueKey;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>补充一点：上面有个 demo 没有说明的是 <code>dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{ xxx }); }</code> 这个方法为什么会在主线程执行呢？可以看下 <code>dispatch_sync</code> 的官方 API 说明</p>
+<blockquote>
+<p>As an optimization, this function invokes the block on the current thread when possible.</p>
+</blockquote>
+<h2 id="GCD-的-API-设计"><a href="#GCD-的-API-设计" class="headerlink" title="GCD 的 API 设计"></a>GCD 的 API 设计</h2><p>GCD 里的 API 设计打都是为了保证多线程下任务的执行顺序。GCD 队列(FIFO)这个概念本身也是为了连续执行 block 而生。这里不打算详细说明具体 API 的使用方法。比如 <code>dispatch_group</code> 相关的 API 是封装了一组任务保证该组任务执行完之后执行某个特定任务，<code>dispatch_semaphore</code> 相关的 API 是等某个任务执行完了再执行某个别的任务。特别说明一下 <code>dispatch_semaphore</code> 这个 API 非常好用，我们经常在业务中比如执行某个网络业务的时候，顺序执行 N 个网络请求来保证业务执行成功，我们会在一个网络请求的异步回调里继续调用另外一个请求的方法，通常的做法是不断的嵌套调用函数，这样是能解决问题，但是不够优雅。但是有了 <code>dispatch_semaphore</code> 我们就可以新的方式去执行这种操作，上个 demo 模拟一下顺序执行一系列异步操作的方法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        dispatch_semaphore_t sem = dispatch_semaphore_create(0);</span><br><span class="line">        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">            NSLog(@&quot;first block&quot;);</span><br><span class="line">            dispatch_semaphore_signal(sem);</span><br><span class="line">        &#125;);</span><br><span class="line">        dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);</span><br><span class="line">        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^&#123;</span><br><span class="line">            NSLog(@&quot;second block&quot;);</span><br><span class="line">            dispatch_semaphore_signal(sem);</span><br><span class="line">        &#125;);</span><br><span class="line">        dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);</span><br><span class="line">        NSLog(@&quot;this is end&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还有 <code>dispatch_barrier_async</code> 控制队列中哪些 block 先执行，哪些后执行。在某种程度上和 <code>dispatch_group</code> 挺像。还有一些是通过控制 queue 的优先级来控制任务的执行顺序的，参考 <code>dispatch_set_target_queue</code> 相关用法。</p>
+<p>以上都是我们经常用的 gcd 的方法，通过 GCD 提供的 API 来控制队列中 block 的执行。当然 GCD 还提供了很多别的功能，比如通过 dispatch_source_create 创建定时器等等这里就不列举了。</p>
+<p>总结：理清楚线程，队列还有 block 三者的关系就能对 GCD 的使用游刃有余。</p>
+<p>参考地址</p>
+<ul>
+<li><a href="https://developer.apple.com/documentation/dispatch" target="_blank" rel="noopener">https://developer.apple.com/documentation/dispatch</a></li>
+<li><a href="http://blog.krzyzanowskim.com/2016/06/03/queues-are-not-bound-to-any-specific-thread/" target="_blank" rel="noopener">http://blog.krzyzanowskim.com/2016/06/03/queues-are-not-bound-to-any-specific-thread/</a></li>
+<li><a href="http://blog.benjamin-encz.de/post/main-queue-vs-main-thread/" target="_blank" rel="noopener">http://blog.benjamin-encz.de/post/main-queue-vs-main-thread/</a></li>
+<li><a href="https://github.com/southpeak/iOS-tech-set/blob/master/2017/10.md#判断是否在主队列运行" target="_blank" rel="noopener">https://github.com/southpeak/iOS-tech-set/blob/master/2017/10.md#判断是否在主队列运行</a></li>
+</ul>
+
+          
+        
       
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
 
 
           </div>
@@ -454,10 +624,6 @@
 
 
           
-
-  
-
-
 
         </div>
         
@@ -478,17 +644,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -548,22 +705,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#property-的本质是什么"><span class="nav-number">1.</span> <span class="nav-text">property 的本质是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#property-和运行时有什么关系"><span class="nav-number">2.</span> <span class="nav-text">property 和运行时有什么关系?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#类是怎么获取到-property-的"><span class="nav-number">2.1.</span> <span class="nav-text">类是怎么获取到 @property 的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类是怎么增加-property-的"><span class="nav-number">2.2.</span> <span class="nav-text">类是怎么增加 property 的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#property-和成员变量是怎么对应起来的？"><span class="nav-number">2.3.</span> <span class="nav-text">property 和成员变量是怎么对应起来的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#property-一个-demo"><span class="nav-number">2.4.</span> <span class="nav-text">property 一个 demo</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -695,10 +836,6 @@
 
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.0"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=6.0.0"></script>
-
-
 
   
 
